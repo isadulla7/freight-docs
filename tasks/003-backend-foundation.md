@@ -16,7 +16,7 @@ Establish the PostgreSQL/PostGIS persistence foundation with Flyway as schema au
 | 3.1A | Kotlin 2.4.10, Java 25, Spring Boot 4.1.0, Spring Modulith 2.1.0, Gradle wrapper, secure baseline configuration, package scaffold, and context smoke test | COMPLETE | [`freight-backend#1`](https://github.com/isadulla7/freight-backend/pull/1) |
 | 3.1B | Explicit Spring Modulith module metadata, accepted dependency allow-list, and architecture verification tests | COMPLETE | [`freight-backend#2`](https://github.com/isadulla7/freight-backend/pull/2) |
 | 3.2 | Security and configuration foundation | COMPLETE | [`freight-backend#3`](https://github.com/isadulla7/freight-backend/pull/3) |
-| 3.3A | PostgreSQL/PostGIS/Flyway/JPA/jOOQ foundation | IN PROGRESS | New draft `freight-backend` pull request |
+| 3.3A | PostgreSQL/PostGIS/Flyway/JPA/jOOQ foundation | IN PROGRESS | [`freight-backend#4`](https://github.com/isadulla7/freight-backend/pull/4) |
 
 Backend Foundation 3.3B and 3.4 are out of scope until 3.3A is reviewed and merged and `NEXT-TASK.md` selects the next checkpoint.
 
