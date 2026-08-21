@@ -2,22 +2,22 @@
 
 | Field | Value |
 |---|---|
-| Last agent | Claude (Cowork) |
+| Last agent | Codex |
 | Repository | `isadulla7/freight-docs` |
-| Current branch | `codex/api-contract-v1` |
+| Current branch | `codex/sync-backend-foundation-status` |
 | Base branch | `main` |
-| Base SHA | `81ac2cb7023dd33329d8ab3e4b8d1316d40dd3c5` |
-| Last pushed SHA | Resolve from GitHub; branch `codex/api-contract-v1` |
-| Current phase | `[2] API Contract v1 — IN PROGRESS` |
+| Base SHA | `b6f759f8a14dbf07ce6350e814ddd14cbe740fc1` |
+| Last pushed SHA | Resolve from GitHub; branch `codex/sync-backend-foundation-status` |
+| Current phase | `[3.1B] Backend Foundation — IN PROGRESS` |
 
 ## Work state
 
-- **Completed work:** OpenAPI 3.1 spec (`contracts/openapi/freight-api-v1.yaml`) with 50 endpoints, 77 schemas covering all 7 modules (identity, accounts, fleet, freight, marketplace, shipment, communication). API documentation suite (`docs/api/`) with 9 files: README, conventions, api-design-standard, authentication, authorization-matrix, errors, pagination-filtering, compatibility, security-abuse, privacy-boundary.
-- **Work in progress:** Draft PR awaiting review.
-- **Remaining work:** Review and merge the API Contract v1 PR. After merge, proceed to Phase 3 Backend Foundation.
-- **Relevant files:** [`contracts/openapi/freight-api-v1.yaml`](contracts/openapi/freight-api-v1.yaml), [`docs/api/README.md`](docs/api/README.md), [`tasks/002-api-contract-v1.md`](tasks/002-api-contract-v1.md).
-- **Validations already run:** YAML parsing, OpenAPI structure (top-level fields, security scheme, path format), domain schema presence (Load, Offer, Shipment, Vehicle, Company), endpoint group coverage (all 9 groups), UUID/date-time format usage, secret scan (clean), Markdown link check.
+- **Completed work:** API Contract v1 merged in `freight-docs#4`; Backend Foundation 3.1A merged in `freight-backend#1`.
+- **Work in progress:** Project-status synchronization and draft [`freight-backend#2`](https://github.com/isadulla7/freight-backend/pull/2) for Backend Foundation 3.1B.
+- **Remaining work:** Review and merge the scoped documentation and backend pull requests.
+- **Relevant files:** [`PROJECT-STATUS.md`](PROJECT-STATUS.md), [`NEXT-TASK.md`](NEXT-TASK.md), [`tasks/003-backend-foundation.md`](tasks/003-backend-foundation.md), and the `freight-backend` 3.1B implementation branch.
+- **Validations already run:** GitHub state reconciled for both repositories; backend `gradlew.bat test` and `gradlew.bat build` pass on Java 25; backend remote compare contains only the 11 expected 3.1B files.
 - **Known blockers:** None.
-- **Exact next action:** Review and merge the `codex/api-contract-v1` branch PR. After merge, update PROJECT-STATUS to COMPLETE for Phase 2 and proceed to Phase 3.
+- **Exact next action:** Review draft [`freight-backend#2`](https://github.com/isadulla7/freight-backend/pull/2), then merge it when the 3.1B review gate is satisfied.
 
 Update this file before the next agent handoff. Do not copy the canonical architecture into it.

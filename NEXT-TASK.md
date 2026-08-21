@@ -1,10 +1,12 @@
 # Next task
 
-After the API Contract v1 pull request is reviewed and merged, continue with:
+Continue with:
 
 - **Current phase:** Backend Foundation
-- **Task specification:** [`tasks/003-backend-foundation.md`](tasks/003-backend-foundation.md) (to be created)
+- **Current checkpoint:** 3.1B — Spring Modulith boundaries + architecture tests
+- **Task specification:** [`tasks/003-backend-foundation.md`](tasks/003-backend-foundation.md)
+- **Implementation repository:** [`isadulla7/freight-backend`](https://github.com/isadulla7/freight-backend)
 
-Backend implementation must not start before API Contract v1 is reviewed and merged.
+API Contract v1 and Backend Foundation 3.1A are reviewed and merged. Checkpoint 3.1B must start from the current `freight-backend/main`, remain within the task specification, and use a short-lived branch and pull request.
 
-Start from the then-current GitHub `main` branch, re-read the sources listed in [`AGENTS.md`](AGENTS.md), and verify the open pull-request state before doing any work.
+Do not begin a later Backend Foundation checkpoint until 3.1B is reviewed and merged and `NEXT-TASK.md` explicitly selects the next checkpoint.
