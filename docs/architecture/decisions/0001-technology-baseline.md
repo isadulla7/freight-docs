@@ -1,9 +1,10 @@
-# ADR-0001: Texnologik baza va modul monolit
+# ADR-0001: Backend texnologik bazasi
 
 - Holat: Qabul qilindi
 - Sana: 2026-08-21
 - Qaror egalari: Loyiha egasi
 - Manba: loyiha boshlanish talablari
+- Canonical kontekst: [Architecture Context v1.0](../../../architecture/architecture-context-v1.md)
 
 ## Kontekst
 
@@ -11,23 +12,16 @@ O‘zbekiston freight marketplace mahsulotini tez va boshqariladigan tarzda bosh
 
 ## Qaror
 
-- Backend Kotlin va Spring Boot asosidagi modul monolit bo‘ladi.
-- Spring Modulith modul chegaralarini ifodalash, tekshirish va modul ichidagi hodisalarni boshqarish uchun ishlatiladi.
+- Backend Kotlin, Java 25 LTS va Spring Boot asosida quriladi.
+- Spring Security autentifikatsiya va avtorizatsiya uchun ishlatiladi.
+- Spring Modulith modul chegaralarini ifodalash va tekshirish uchun ishlatiladi; batafsil arxitektura [ADR-0002](0002-modular-monolith.md) da.
 - Oddiy aggregate va transactional CRUD uchun JPA, murakkab yoki o‘qishga yo‘naltirilgan SQL uchun jOOQ ishlatiladi.
 - Ma’lumotlar bazasi o‘zgarishlari Flyway orqali versiyalanadi.
 - Doimiy ma’lumotlar PostgreSQL’da, geografik ma’lumotlar PostGIS orqali saqlanadi va so‘raladi.
 - Redis faqat aniq, vaqtinchalik va qayta tiklanadigan use case uchun ishlatiladi; u asosiy ma’lumot manbai emas.
-- API shartnomalari OpenAPI orqali hujjatlashtiriladi va tekshiriladi.
-- Mobil mijoz Flutter, web mijoz Next.js, React va TypeScript bilan quriladi.
+- API shartnomalari OpenAPI orqali hujjatlashtiriladi va tekshiriladi; ownership [ADR-0007](0007-openapi-contract.md) da.
+- Testlar JUnit va real dependency containerlari uchun Testcontainers bilan yoziladi.
 - Lokal ishlab chiqish uchun zarur bog‘liqliklar Docker Compose orqali ishga tushiriladi.
-
-## Modul qoidalari
-
-- har bir modul o‘z domen modeli va persistence tafsilotlariga egalik qiladi;
-- boshqa modul faqat e’lon qilingan API yoki hodisadan foydalanadi;
-- modulning ichki package’iga to‘g‘ridan-to‘g‘ri bog‘lanish taqiqlanadi;
-- cross-module database join odatiy integratsiya mexanizmi emas;
-- Modulith va arxitektura testlari build jarayonida chegaralarni tekshiradi.
 
 ## Oqibatlar
 
@@ -46,12 +40,7 @@ O‘zbekiston freight marketplace mahsulotini tez va boshqariladigan tarzda bosh
 
 ## Xavfsizlik va maxfiylik
 
-- deny-by-default avtorizatsiya;
-- eng kam imtiyoz va ma’lumotlarni minimallashtirish;
-- secretlar faqat tashqi secret/config mexanizmi orqali beriladi;
-- loglarda token, credential, aniq lokatsiya va keraksiz shaxsiy ma’lumot bo‘lmaydi;
-- shaxsiy va geolokatsion ma’lumotlar uchun saqlash muddati va kirish auditi alohida qarorda belgilanadi;
-- API kirishlari validatsiya qilinadi va chiqishlar ortiqcha maydonlarni oshkor qilmaydi.
+Umumiy privacy/security baseline [ADR-0010](0010-privacy-and-security-baseline.md) da boshqariladi. Ushbu texnologik stack deny-by-default avtorizatsiya, least privilege, data minimization va tashqi secret konfiguratsiyasini qo‘llab-quvvatlashi shart.
 
 ## Tekshirish
 

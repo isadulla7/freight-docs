@@ -12,6 +12,8 @@
 | `shipment` | Taklif qabul qilingandan keyingi real tashish, assignment va holat tarixi |
 | `communication` | Chat, notification, SMS/push orchestratsiyasi va aloqa sozlamalari |
 
+Har bir modulning ownership tafsiloti [canonical kontekstning 10-bo‘limida](../../architecture/architecture-context-v1.md#10-backend-module-boundaries) berilgan.
+
 ## Bog‘liqlik qoidalari
 
 - modul faqat kichik public API va domain eventlarni ochadi;
@@ -21,6 +23,22 @@
 - `shared` faqat haqiqiy fundamental primitive uchun ishlatiladi;
 - biznes mantiq controller yoki persistence adapterda emas, domain/application qatlamida bo‘ladi;
 - modul chegaralari Spring Modulith va arxitektura testlari bilan tekshiriladi.
+
+## Ichki tuzilma
+
+Core business modullar odatda quyidagi qatlamlarni saqlaydi:
+
+```text
+module/
+├── domain/
+├── application/
+├── adapter/
+│   ├── in/
+│   └── out/
+└── config/
+```
+
+Muhim aggregate uchun domain model va JPA persistence entity ajratiladi hamda mapper bilan bog‘lanadi. Oddiy reference/config data uchun foyda bermaydigan ceremony qo‘shilmaydi.
 
 ## Muhim domen farqi
 

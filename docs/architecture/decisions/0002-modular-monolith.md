@@ -5,6 +5,7 @@
 - Qaror egalari: Loyiha egasi
 - Manba: taqdim etilgan boshlang‘ich arxitektura hujjatlari
 - Tegishli ADR: [ADR-0001](0001-technology-baseline.md)
+- Canonical kontekst: [Architecture Context v1.0](../../../architecture/architecture-context-v1.md)
 
 ## Kontekst
 
@@ -16,7 +17,10 @@ MVP bosqichida mikroservislar deployment, networking, observability va consisten
 - DDD-lite domen tilini va aggregate chegaralarini saqlash uchun ishlatiladi;
 - hexagonal arxitektura domainni transport, persistence va tashqi providerlardan ajratadi;
 - CQRS-lite faqat murakkab read workload uchun ishlatiladi, distributed CQRS emas;
-- modul boshqa modulning internal persistence qatlamiga kira olmaydi.
+- modul boshqa modulning internal persistence qatlamiga kira olmaydi;
+- muhim aggregate domain modeli JPA entity’dan ajratiladi va mapper orqali bog‘lanadi;
+- domain Spring MVC, JPA annotation, Redis, provider SDK yoki transport modeliga bog‘lanmaydi;
+- trivial reference/config ma’lumotida qiymat bermaydigan boilerplate majburan qo‘shilmaydi.
 
 ## Ajratish sharti
 

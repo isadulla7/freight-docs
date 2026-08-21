@@ -1,5 +1,7 @@
 # Privacy by design
 
+Qabul qilingan umumiy qaror: [ADR-0010](../architecture/decisions/0010-privacy-and-security-baseline.md).
+
 Maxfiylik release oxiridagi hujjat emas, arxitektura talabidir.
 
 Har bir yangi personal-data maydoni yoki feature uchun quyidagilar aniqlanadi:
@@ -43,3 +45,7 @@ Consent versiyalanadi va audit qilinadi:
 ## O‘chirish
 
 Akkaunt o‘chirish relational tarixni ko‘r-ko‘rona o‘chirishga tayanmaydi. Har bir data kategoriya uchun deletion, anonymization va qonuniy/biznes retention alohida belgilanadi.
+
+## Huquqiy ko‘rib chiqish
+
+Ushbu texnik hujjatlar huquqiy maslahat emas. Public production launchdan oldin Privacy Policy, Terms of Service, driver/company shartlari, consent/retention va kerak bo‘lsa cookie siyosati Uzbekistan-specific malakali mahalliy yurist tomonidan ko‘rib chiqiladi.

@@ -9,6 +9,18 @@ Bu repository quyidagilar uchun yagona ishonchli manba hisoblanadi:
 - xavfsizlik va maxfiylik tamoyillari;
 - umumiy terminlar.
 
+## Canonical kontekst
+
+[Architecture Context v1.0](architecture/architecture-context-v1.md) loyiha visioni, scope’i va umumiy arxitektura handoff’i uchun canonical manbadir. Arxitektura qarorlarining ustuvorlik tartibi:
+
+1. eng yangi qabul qilingan ADR;
+2. canonical architecture context yoki uning vorisi;
+3. tematik/modul hujjatlari;
+4. OpenAPI shartnomasi;
+5. kod va testlar.
+
+Nomuvofiqlik defect hisoblanadi va yashirin talqin bilan emas, ADR hamda hujjat yangilanishi orqali bartaraf etiladi.
+
 ## Boshlang‘ich texnologik baza
 
 - backend: Kotlin, Spring Boot, Spring Modulith, JPA, jOOQ, Flyway;
@@ -18,7 +30,7 @@ Bu repository quyidagilar uchun yagona ishonchli manba hisoblanadi:
 - lokal infratuzilma: Docker Compose;
 - API shartnomasi: OpenAPI.
 
-Ushbu ro‘yxatning asoslari va oqibatlari [ADR-0001](docs/architecture/decisions/0001-technology-baseline.md) da qayd etilgan.
+Ushbu ro‘yxatning asoslari va oqibatlari [ADR indeksida](docs/architecture/decisions/README.md) qayd etilgan.
 
 ## Hujjatlar xaritasi
 
@@ -36,6 +48,7 @@ Ushbu ro‘yxatning asoslari va oqibatlari [ADR-0001](docs/architecture/decision
 - [Shaxsiy ma’lumotlar inventari](docs/privacy/data-inventory.md)
 - [Privacy by design](docs/privacy/privacy-by-design.md)
 - [Definition of Done](docs/operations/definition-of-done.md)
+- [Quality va delivery](docs/operations/quality-and-delivery.md)
 - [Glossariy](docs/glossary.md)
 - [Hissa qo‘shish qoidalari](CONTRIBUTING.md)
 

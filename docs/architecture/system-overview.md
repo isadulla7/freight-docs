@@ -12,7 +12,8 @@ O‘zbekistonda yuk egalari, kompaniyalar, haydovchilar va transport vositalarin
 
 ## Backend uslubi
 
-- Kotlin va Spring Boot;
+- Kotlin, Java 25 LTS va Spring Boot;
+- Spring Security;
 - Spring Modulith bilan modul monolit;
 - DDD-lite va hexagonal arxitektura;
 - o‘qish samaradorligi zarur joylarda CQRS-lite;
@@ -28,7 +29,7 @@ flowchart LR
     Adapter --> Infra["PostgreSQL / Redis / S3 / tashqi provider"]
 ```
 
-Domain Spring MVC, JPA entity, Redis client, Firebase, xarita/SMS provider yoki S3 SDK’ga bog‘lanmaydi. Tashqi texnologiyalar port va adapter ortida qoladi.
+Domain Spring MVC, JPA annotation/entity, Redis client, Firebase, xarita/SMS provider yoki S3 SDK’ga bog‘lanmaydi. Tashqi texnologiyalar port va adapter ortida qoladi.
 
 ## Ma’lumot va infratuzilma
 
@@ -36,7 +37,9 @@ Domain Spring MVC, JPA entity, Redis client, Firebase, xarita/SMS provider yoki 
 - JPA/Hibernate — transactional write flow;
 - jOOQ — feed, qidiruv, reporting va murakkab read query;
 - Redis — cache, OTP, rate limit va qayta tiklanadigan vaqtinchalik realtime holat;
-- S3-compatible object storage — fayllar, maxfiy obyektlar private holatda;
+- S3-compatible object storage, lokalda MinIO — fayllar, maxfiy obyektlar private holatda;
 - Flyway — sxema migratsiyasi;
 - OpenAPI — versiyalangan API shartnomasi;
 - Docker/Docker Compose — reproduktiv lokal runtime va container asosidagi deployment.
+
+Test baseline: JUnit va Testcontainers. PostgreSQL/PostGIS integration testlari H2 bilan almashtirilmaydi.

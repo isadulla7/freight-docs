@@ -1,5 +1,7 @@
 # Repository strategiyasi
 
+Qabul qilingan qaror: [ADR-0009](decisions/0009-repository-strategy.md).
+
 ## Qabul qilingan boshlanish
 
 `freight-docs` birinchi repository bo‘lib, barcha repositorylarga ta’sir qiladigan qarorlarni saqlaydi.

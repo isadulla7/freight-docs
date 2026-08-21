@@ -15,3 +15,10 @@ Feature faqat tegishli bandlar bajarilganda tugallangan hisoblanadi:
 - hujjatlar va ADR yangilangan;
 - secret commit qilinmagan;
 - biznes correctness’ga ta’sir qiluvchi ochiq TODO qolmagan.
+
+Sensitive feature uchun qo‘shimcha:
+
+- consent modeli ko‘rib chiqilgan;
+- data access scope tekshirilgan;
+- deletion/anonymization xulqi aniqlangan;
+- third-party providerga uzatiladigan data inventarga kiritilgan.

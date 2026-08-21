@@ -1,5 +1,7 @@
 # Security baseline
 
+Qabul qilingan umumiy qaror: [ADR-0010](../architecture/decisions/0010-privacy-and-security-baseline.md).
+
 ## Autentifikatsiya
 
 - MVP uchun telefon va OTP;
@@ -42,3 +44,7 @@ Password, raw token, OTP yoki keraksiz sensitive payload log qilinmaydi.
 - sensitive fayllar uchun private storage;
 - infratuzilma qo‘llasa database backup shifrlanadi;
 - restore jarayoni faqat sozlanmaydi, muntazam test qilinadi.
+
+## Provider va audit chegarasi
+
+Firebase, SMS, maps, object storage, analytics, crash reporting va keyingi payment providerlar uchun yuboriladigan data, purpose, processing region va ma’lum retention alohida inventarda yuritiladi. Provider domain mantiqqa bevosita bog‘lanmaydi.
