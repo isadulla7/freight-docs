@@ -25,6 +25,7 @@ Ushbu inventar [Database ERD v1](../architecture/database-erd.md) table/fieldlar
 | `identity.auth_sessions` | user/device IDs, refresh-token hash, expiry/revoke/reuse metadata | `A` |
 | `identity.auth_devices` | user ID, installation hash, last seen/revoked | `A` |
 | `accounts.users` | UUID, display name, status, locale/timezone | `I` |
+| `accounts.user_consents` | user, consent type/policy version, accepted/withdrawn evidence | `I`, `A` |
 | `accounts.driver_profiles` | user ID, driver profile, verification status | `I`, `D` |
 | `accounts.driver_documents` | type, private storage key, size/hash, expiry | `D` |
 | `accounts.driver_verifications` | subject/verifier IDs, decision, reason/evidence version | `D`, `A` |

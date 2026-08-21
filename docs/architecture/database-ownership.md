@@ -7,7 +7,7 @@ Qaror [ADR-0013](decisions/0013-shared-database-ownership.md)da: bitta PostgreSQ
 | Modul | PostgreSQL schema | Owned tables |
 | --- | --- | --- |
 | `identity` | `identity` | `auth_identities`, `auth_sessions`, `auth_devices` |
-| `accounts` | `accounts` | `users`, `driver_profiles`, `driver_documents`, `driver_verifications`, `companies`, `company_members`, `roles`, `permissions`, `role_permissions`, `user_roles`, `company_member_roles`, `security_audit_log` |
+| `accounts` | `accounts` | `users`, `user_consents`, `driver_profiles`, `driver_documents`, `driver_verifications`, `companies`, `company_members`, `roles`, `permissions`, `role_permissions`, `user_roles`, `company_member_roles`, `security_audit_log` |
 | `fleet` | `fleet` | `vehicle_types`, `body_types`, `vehicle_capabilities`, `vehicles`, `vehicle_capability_assignments`, `vehicle_documents`, `vehicle_verifications`, `available_vehicles` |
 | `freight` | `freight` | `loads`, `load_stops`, `load_requirements`, `load_required_capabilities`, `load_images` |
 | `marketplace` | `marketplace` | `offers` |

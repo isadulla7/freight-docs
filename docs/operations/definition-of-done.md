@@ -22,3 +22,5 @@ Sensitive feature uchun qo‘shimcha:
 - data access scope tekshirilgan;
 - deletion/anonymization xulqi aniqlangan;
 - third-party providerga uzatiladigan data inventarga kiritilgan.
+
+Architecture-impacting feature uchun [Architecture v1.0 Lock](../architecture/README.md) bilan consistency, [open question](../architecture/open-questions.md) gate va zarur ADR review qilinadi.

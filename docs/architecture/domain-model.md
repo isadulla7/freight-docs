@@ -33,6 +33,8 @@ Model DDD-lite: faqat mustaqil invariant, lifecycle yoki concurrency boundary bo
 - **References:** external auth identity UserId orqali ayni userni ko‘rsatadi.
 - **Must not contain:** vehicle, load, offer, shipment collections yoki UI `userType` flag.
 
+`UserConsent` versioned, auditable append record: consent type/policy version/accepted/withdrawn time. U UI checkbox state emas; alohida legal-purpose record bo‘lib, exact lawful-basis va withdrawal effect `OPEN LEGAL DECISION`.
+
 ### `DriverProfile` aggregate root
 
 - **Identity:** `DriverProfileId`, unique `UserId`.

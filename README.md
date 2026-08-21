@@ -39,12 +39,19 @@ Ushbu ro‘yxatning asoslari va oqibatlari [ADR indeksida](docs/architecture/dec
 - [Tizim arxitekturasi](docs/architecture/system-overview.md)
 - [Modul chegaralari](docs/architecture/module-boundaries.md)
 - [Domen modeli](docs/architecture/domain-model.md)
+- [Domen invariantlari](docs/architecture/domain-invariants.md)
 - [API dizayni](docs/architecture/api-design.md)
 - [Holat mashinalari](docs/architecture/state-machines.md)
+- [Event katalogi](docs/architecture/event-catalog.md)
+- [Database ERD v1](docs/architecture/database-erd.md)
+- [Database ownership](docs/architecture/database-ownership.md)
+- [Authorization modeli](docs/architecture/authorization-model.md)
+- [Architecture v1.0 open questions](docs/architecture/open-questions.md)
 - [Repository strategiyasi](docs/architecture/repository-map.md)
 - [Arxitektura qarorlari](docs/architecture/decisions/README.md)
 - [Xavfsizlik va maxfiylik](docs/principles/security-and-privacy.md)
 - [Security baseline](docs/security/security-baseline.md)
+- [MVP threat review](docs/security/threat-review-v1.md)
 - [Shaxsiy ma’lumotlar inventari](docs/privacy/data-inventory.md)
 - [Privacy by design](docs/privacy/privacy-by-design.md)
 - [Definition of Done](docs/operations/definition-of-done.md)
@@ -54,4 +61,4 @@ Ushbu ro‘yxatning asoslari va oqibatlari [ADR indeksida](docs/architecture/dec
 
 ## Holat
 
-Loyiha boshlang‘ich bosqichda. Tasdiqlangan boshlang‘ich qarorlar ADR va tematik hujjatlarga ko‘chirildi. Hali aniqlanmagan masalalar ochiq savol sifatida saqlanadi; taxminlar arxitektura qarori sifatida qabul qilinmaydi.
+Architecture v1.0 Lock review gate hujjatlari tayyorlangan. [Ochiq savollar](docs/architecture/open-questions.md)da backend foundationni bloklaydigan qaror yo‘q, ammo ushbu lock PR review va merge qilinmaguncha application code yoki yangi repository boshlanmaydi. Hali aniqlanmagan product/legal masala taxmin qilinmaydi.

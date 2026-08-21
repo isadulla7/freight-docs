@@ -19,6 +19,8 @@ Batafsil qaror: [ADR-0005](../architecture/decisions/0005-authentication-and-ses
 - admin rollari scope bilan chegaralanadi;
 - `admin hamma narsani ko‘radi` degan standart taxmin yo‘q.
 
+Batafsil permission/resource matrix: [Authorization modeli](../architecture/authorization-model.md).
+
 ## Secretlar
 
 - Git’da secret yo‘q;
@@ -48,3 +50,5 @@ Password, raw token, OTP yoki keraksiz sensitive payload log qilinmaydi.
 ## Provider va audit chegarasi
 
 Firebase, SMS, maps, object storage, analytics, crash reporting va keyingi payment providerlar uchun yuboriladigan data, purpose, processing region va ma’lum retention alohida inventarda yuritiladi. Provider domain mantiqqa bevosita bog‘lanmaydi.
+
+MVP abuse case va architecture mitigations: [Threat review v1](threat-review-v1.md).

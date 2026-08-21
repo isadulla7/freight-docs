@@ -56,6 +56,7 @@ OTP challenge/value PostgreSQL’da saqlanmaydi: Redis TTL, attempt counter va r
 | Table | PK, references va important uniques | Timestamps / lifecycle | Class | Key indexes |
 | --- | --- | --- | --- | --- |
 | `accounts.users` | `id`; display name, status; auth credential yo‘q | created/updated, `anonymized_at`; status/anonymize, blind soft-delete flag yo‘q | `I` | `(status,created_at)` |
+| `accounts.user_consents` | `id`; user ID, consent type, policy version, source; unique acceptance record | `accepted_at`, nullable `withdrawn_at`; append/preserve evidence, effect/retention OPEN LEGAL DECISION | `I`, `A` | `(user_id,consent_type,accepted_at desc)`, policy version |
 | `accounts.driver_profiles` | `id`; `user_id -> users` unique; profile/verification status | created/updated; deactivate/anonymize per account policy | `I`, `D` | unique user, verification status |
 | `accounts.driver_documents` | `id`; `driver_profile_id`; document type, private `storage_key`, media/size/hash | created/updated, `expires_at`, `deleted_at` only controlled object deletion; retention OPEN LEGAL DECISION | `D` | `(driver_profile_id,document_type)`, expiry |
 | `accounts.driver_verifications` | `id`; profile, verifier user, status/reason/evidence version | `decided_at`; append-only, no soft delete | `D`, `A` | `(driver_profile_id,decided_at desc)`, verifier |

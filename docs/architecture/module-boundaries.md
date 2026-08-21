@@ -37,7 +37,7 @@ Ushbu hujjat canonical kontekstdagi [modul qoidalarini](../../architecture/archi
 
 **Aggregate/entitylar.** `User`; `DriverProfile`; `Company` + `CompanyMember`; `Role`, `Permission`; driver document/verification metadata.
 
-**Public application API.** `ProvisionUser`, `GetUserSummary`, `CreateOrUpdateDriverProfile`, `CreateCompany`, `AddCompanyMember`, `RemoveCompanyMember`, `AssignUserRole`, `AssignCompanyMemberRole`, `Authorize`, `GetDriverEligibility`, `AppendSecurityAudit`.
+**Public application API.** `ProvisionUser`, `GetUserSummary`, `RecordConsent`, `CreateOrUpdateDriverProfile`, `CreateCompany`, `AddCompanyMember`, `RemoveCompanyMember`, `AssignUserRole`, `AssignCompanyMemberRole`, `Authorize`, `GetDriverEligibility`, `AppendSecurityAudit`.
 
 **Publish.** `CompanyMemberAdded`, `CompanyMemberRemoved`, `DriverVerificationChanged`.
 
@@ -47,7 +47,7 @@ Ushbu hujjat canonical kontekstdagi [modul qoidalarini](../../architecture/archi
 
 **Forbidden.** OTP/session lifecycle, vehicle/load/offer/shipment holatini boshqarish; admin roliga avtomatik sensitive-data access berish.
 
-**Data ownership.** `accounts.users`, `driver_profiles`, `driver_documents`, `driver_verifications`, `companies`, `company_members`, `roles`, `permissions`, role mapping jadvallari va `security_audit_log`.
+**Data ownership.** `accounts.users`, `user_consents`, `driver_profiles`, `driver_documents`, `driver_verifications`, `companies`, `company_members`, `roles`, `permissions`, role mapping jadvallari va `security_audit_log`.
 
 ## `fleet`
 
@@ -99,7 +99,7 @@ Ushbu hujjat canonical kontekstdagi [modul qoidalarini](../../architecture/archi
 
 **Publish.** `OfferCreated`, `OfferAccepted`, `OfferRejected`, `OfferWithdrawn`, `OfferExpired`.
 
-**Consume.** `LoadCancelled`, `LoadExpired`, `VehicleVerified` va kerak bo‘lsa `LoadPublished` matching reactionlari.
+**Consume.** `LoadCancelled`, `LoadExpired`, `VehicleVerified`, `AvailableVehiclePublished`, `AvailableVehicleClosed` va kerak bo‘lsa `LoadPublished` matching reactionlari.
 
 **Allowed dependency.** `accounts` authorization/driver eligibility, `fleet` vehicle eligibility, `freight` load eligibility va `MatchLoad` public APIlari.
 
@@ -135,7 +135,7 @@ Ushbu hujjat canonical kontekstdagi [modul qoidalarini](../../architecture/archi
 
 **Publish.** `MessageCreated` (communication ichki delivery/realtime reactioni; v1 cross-module contract emas).
 
-**Consume.** `UserRegistered`, `CompanyMemberAdded`, `VehicleVerified`, `LoadPublished`, `LoadCancelled`, `OfferCreated`, `OfferAccepted`, `OfferRejected`, `ShipmentCreated`, `ShipmentStatusChanged`, `ShipmentDelivered`, `ShipmentCompleted`dan faqat aniq notification use case talab qilganlari.
+**Consume.** `UserRegistered`, `CompanyMemberAdded`, `CompanyMemberRemoved`, `DriverVerificationChanged`, `VehicleVerified`, `LoadPublished`, `LoadCancelled`, `OfferCreated`, `OfferAccepted`, `OfferRejected`, `ShipmentCreated`, `ShipmentStatusChanged`, `ShipmentDelivered`, `ShipmentCompleted`dan faqat aniq notification use case talab qilganlari.
 
 **Allowed dependency.** `accounts` public user/authorization API; SMS, push va WebSocket adapterlari outbound port orqali; boshqa modullarning stable event contractlari.
 

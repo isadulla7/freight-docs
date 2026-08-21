@@ -1,4 +1,4 @@
-# Arxitektura
+# Arxitektura — v1.0 Lock
 
 Loyiha bo‘yicha to‘liq canonical handoff: [Architecture Context v1.0](../../architecture/architecture-context-v1.md). Ushbu katalogdagi hujjatlar canonical kontekstning aniq mavzular bo‘yicha ixcham, implementationga yaqin ko‘rinishidir. Ziddiyatda eng yangi qabul qilingan ADR, keyin canonical kontekst ustun turadi.
 
@@ -18,11 +18,32 @@ Boshlang‘ich yechim — aniq modul chegaralariga ega modul monolit. Spring Mod
 
 ## Hujjatlar
 
+### Context va chegaralar
+
 - [Tizim konteksti](system-context.md)
 - [Tizim arxitekturasi](system-overview.md)
-- [Modul chegaralari](module-boundaries.md)
+- [Modul chegaralari va dependency matrix](module-boundaries.md)
 - [Domen modeli](domain-model.md)
+- [Domen invariantlari](domain-invariants.md)
+
+### Lifecycle va integratsiya
+
+- [Load/Offer/Shipment holat mashinalari](state-machines.md)
+- [Domain/application event katalogi](event-catalog.md)
+- [Authorization modeli](authorization-model.md)
 - [API dizayni](api-design.md)
-- [Holat mashinalari](state-machines.md)
+
+### Data
+
+- [Database ERD v1](database-erd.md)
+- [Database ownership](database-ownership.md)
+- [Privacy data inventory](../privacy/data-inventory.md)
+
+### Review va governance
+
+- [Architecture v1.0 open questions](open-questions.md)
+- [MVP threat review](../security/threat-review-v1.md)
 - [Repository strategiyasi](repository-map.md)
 - [ADR indeksi](decisions/README.md)
+
+Architecture v1.0 lock PR review va merge qilinmaguncha application code yoki yangi backend/mobile/web/infrastructure repository boshlanmaydi.
