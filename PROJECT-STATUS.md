@@ -7,9 +7,10 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Field | Value |
 |---|---|
 | Current architecture version | `v1.0` |
-| Current `main` SHA | `7dcb9eb1718d33f1820c0c2a64cc3ddec478cd8e` |
+| Authoritative `main` | Resolve the current SHA from GitHub; repository state is authoritative |
+| Agent Handoff System merge SHA | `81ac2cb7023dd33329d8ab3e4b8d1316d40dd3c5` |
 | Latest completed architecture gate | Architecture v1.0 Lock |
-| Current task | `[1.5] Agent Handoff System` |
+| Current task | None — API Contract v1 is next and has not started |
 | Next task | `[2] API Contract v1` — [`tasks/002-api-contract-v1.md`](tasks/002-api-contract-v1.md) |
 
 ## Roadmap
@@ -18,7 +19,7 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 |---:|---|---|
 | 0 | Canonical Context | **COMPLETE** |
 | 1 | Architecture v1.0 Lock | **COMPLETE** |
-| 1.5 | Agent Handoff System | **IN PROGRESS** |
+| 1.5 | Agent Handoff System | **COMPLETE** |
 | 2 | API Contract v1 | **NEXT** |
 | 3 | Backend Foundation | **PENDING** |
 | 4 | Local Infrastructure | **PENDING** |
@@ -31,4 +32,4 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 11 | Communication | **PENDING** |
 | 12 | Mobile/Web | **PENDING** |
 
-Statuses change only when the corresponding review gate is completed in GitHub. Until this handoff-system pull request is merged, phase 1.5 remains **IN PROGRESS**.
+Statuses change only when the corresponding review gate is completed in GitHub. Phase 2 remains **NEXT** until API Contract v1 starts as a separate bounded task.
