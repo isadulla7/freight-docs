@@ -1417,17 +1417,13 @@ paths:
         Concurrency-safe: version conflict `409` qaytaradi.
       parameters:
         - $ref: '#/components/parameters/OfferId'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       x-required-permissions: [OFFER_ACCEPT]
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                expectedLoadVersion:
-                  type: integer
-                  format: int64
-                  description: Load concurrency guard uchun kutilgan version
+              $ref: '#/components/schemas/AcceptOfferRequest'
       responses:
         '200':
           description: Taklif qabul qilindi, shipment yaratiladi
@@ -1870,6 +1866,18 @@ components:
 
   # ── Parameters ────────────────────────────
   parameters:
+    IdempotencyKeyHeader:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: |
+        Client-generated unique key. Birinchi request normal bajariladi va natijani
+        cache qiladi. Takroriy request (bir xil key) cached natijani qaytaradi.
+        Boshqa request body bilan bir xil key yuborilsa 409 IDEMPOTENCY_KEY_CONFLICT.
+
     CursorParam:
       name: cursor
       in: query
@@ -3056,6 +3064,14 @@ components:
           type: string
           maxLength: 1000
           description: Ixtiyoriy xabar
+
+    AcceptOfferRequest:
+      type: object
+      properties:
+        expectedLoadVersion:
+          type: integer
+          format: int64
+          description: Load concurrency guard uchun kutilgan version
 
     Offer:
       type: object
