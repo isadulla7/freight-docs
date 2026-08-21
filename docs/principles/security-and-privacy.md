@@ -28,3 +28,9 @@
 4. Log, analytics, backup va cache’da nima qoladi?
 5. Abuse case va ruxsatsiz kirish qanday cheklanadi?
 6. Qaror test va audit orqali qanday isbotlanadi?
+
+## Batafsil hujjatlar
+
+- [Security baseline](../security/security-baseline.md)
+- [Shaxsiy ma’lumotlar inventari](../privacy/data-inventory.md)
+- [Privacy by design](../privacy/privacy-by-design.md)

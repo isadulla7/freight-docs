@@ -20,3 +20,5 @@ Arxitektura qarorini koddan oldin aniq yozing. Qaror kichik, tekshiriladigan va 
 - maxfiy ma’lumotlar, tokenlar va real shaxs ma’lumotlari commit qilinmaydi;
 - havolalar va nisbiy fayl yo‘llari tekshiriladi;
 - murakkablik qo‘shilsa, uning zarurati va soddaroq variant nega yetarli emasligi yoziladi.
+
+Feature tayyorligi uchun [Engineering Definition of Done](docs/operations/definition-of-done.md) qo‘llanadi.

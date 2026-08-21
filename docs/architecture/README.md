@@ -17,5 +17,10 @@ Boshlang‘ich yechim — aniq modul chegaralariga ega modul monolit. Spring Mod
 ## Hujjatlar
 
 - [Tizim konteksti](system-context.md)
+- [Tizim arxitekturasi](system-overview.md)
+- [Modul chegaralari](module-boundaries.md)
+- [Domen modeli](domain-model.md)
+- [API dizayni](api-design.md)
+- [Holat mashinalari](state-machines.md)
 - [Repository strategiyasi](repository-map.md)
 - [ADR indeksi](decisions/README.md)

@@ -31,7 +31,7 @@ Quyidagilar mavjud arxitektura suhbatidan ko‘chirilgach alohida qaror sifatida
 
 - foydalanuvchi rollari va ishonch modeli;
 - buyurtma, taklif, bronlash va bajarish jarayonlari;
-- identifikatsiya va autentifikatsiya;
+- account recovery va telefon raqamini almashtirish xavfsizlik oqimi;
 - real vaqt yangilanishlari va bildirishnomalar;
 - to‘lov va komissiya modeli;
 - geolokatsiyani yig‘ish, saqlash muddati va ko‘rish huquqlari;

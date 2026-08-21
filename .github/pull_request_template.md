@@ -17,3 +17,5 @@
 ## Tekshirish
 
 <!-- Havolalar, testlar yoki qo‘lda tekshirish natijalari. -->
+
+- [ ] Tegishli [Definition of Done](../docs/operations/definition-of-done.md) bandlari bajarildi.
