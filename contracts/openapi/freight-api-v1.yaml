@@ -1,0 +1,3627 @@
+openapi: 3.1.0
+info:
+  title: Freight Platform API
+  version: 1.0.0-draft
+  description: |
+    O'zbekiston uchun raqamli yuk tashish marketplace platformasi API contracti.
+
+    Ushbu spec [Architecture Context v1.0](../../architecture/architecture-context-v1.md),
+    [domain model](../../docs/architecture/domain-model.md),
+    [state machines](../../docs/architecture/state-machines.md),
+    [authorization model](../../docs/architecture/authorization-model.md)
+    va tegishli ADRlarga asoslanadi.
+
+    Konvensiyalar: [API conventions](../../docs/api/conventions.md).
+  contact:
+    name: Freight Platform
+  license:
+    name: Private
+servers:
+  - url: /api/v1
+    description: API v1 base path
+
+tags:
+  - name: auth
+    description: Authentication va session boshqaruvi (identity moduli)
+  - name: users
+    description: Foydalanuvchi profili (accounts moduli)
+  - name: drivers
+    description: Haydovchi profili va hujjatlari (accounts moduli)
+  - name: companies
+    description: Kompaniya va a'zolik (accounts moduli)
+  - name: vehicles
+    description: Transport vositalari (fleet moduli)
+  - name: available-vehicles
+    description: Mavjud transport e'lonlari (fleet moduli)
+  - name: reference-data
+    description: Transport turi, kuzov turi va qobiliyat reference ma'lumotlari (fleet moduli)
+  - name: loads
+    description: Yuk e'lonlari (freight moduli)
+  - name: offers
+    description: Narx takliflari (marketplace moduli)
+  - name: shipments
+    description: Tashish executioni (shipment moduli)
+  - name: conversations
+    description: Chat va xabarlar (communication moduli)
+  - name: notifications
+    description: Bildirishnomalar (communication moduli)
+
+# ─────────────────────────────────────────────
+#  Security
+# ─────────────────────────────────────────────
+security:
+  - bearerAuth: []
+
+# ─────────────────────────────────────────────
+#  Paths
+# ─────────────────────────────────────────────
+paths:
+
+  # ── Auth ──────────────────────────────────
+
+  /auth/otp/request:
+    post:
+      operationId: requestOtp
+      tags: [auth]
+      summary: OTP so'rash
+      description: |
+        Berilgan telefon raqamiga OTP yuboradi.
+        Rate-limit qo'llaniladi.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpRequest'
+            example:
+              phone: "+998901234567"
+      responses:
+        '200':
+          description: OTP yuborildi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpRequestResponse'
+              example:
+                otpId: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                expiresAt: "2026-08-21T14:35:00Z"
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /auth/otp/verify:
+    post:
+      operationId: verifyOtp
+      tags: [auth]
+      summary: OTP tasdiqlash va autentifikatsiya
+      description: |
+        OTP kodni tasdiqlaydi. Muvaffaqiyatli bo'lsa access va refresh tokenlarni qaytaradi.
+        Yangi foydalanuvchi uchun account avtomatik yaratiladi (registration + login birlashgan).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpVerify'
+            example:
+              otpId: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+              code: "123456"
+              deviceInfo:
+                installationId: "device-install-abc123"
+                platform: "ANDROID"
+                name: "Samsung Galaxy S24"
+      responses:
+        '200':
+          description: Autentifikatsiya muvaffaqiyatli
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+              example:
+                accessToken: "eyJhbGciOiJSUzI1NiIs..."
+                refreshToken: "dGhpcyBpcyBhIHJlZnJl..."
+                expiresAt: "2026-08-21T15:00:00Z"
+                user:
+                  id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                  displayName: null
+                  isNewUser: true
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /auth/refresh:
+    post:
+      operationId: refreshToken
+      tags: [auth]
+      summary: Access tokenni yangilash
+      description: |
+        Refresh token orqali yangi access/refresh token juftligini oladi.
+        Refresh token rotation qo'llaniladi: eski refresh token ishlatib bo'linadi.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Token yangilandi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Joriy sessionni tugatish
+      description: Joriy refresh token va sessionni revoke qiladi.
+      responses:
+        '204':
+          description: Session tugatildi
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /auth/sessions/revoke-all:
+    post:
+      operationId: revokeAllSessions
+      tags: [auth]
+      summary: Barcha boshqa sessiyalarni bekor qilish
+      description: Joriy sessiondan tashqari barcha sessiyalarni revoke qiladi.
+      responses:
+        '204':
+          description: Barcha boshqa sessiyalar bekor qilindi
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /auth/sessions:
+    get:
+      operationId: listSessions
+      tags: [auth]
+      summary: Foydalanuvchi sessiyalarini ko'rish
+      description: Joriy foydalanuvchining barcha faol sessiyalarini qaytaradi.
+      responses:
+        '200':
+          description: Sessiyalar ro'yxati
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SessionSummary'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /auth/sessions/{sessionId}/revoke:
+    post:
+      operationId: revokeSession
+      tags: [auth]
+      summary: Muayyan sessionni bekor qilish
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '204':
+          description: Session bekor qilindi
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Users ─────────────────────────────────
+
+  /users/me:
+    get:
+      operationId: getCurrentUser
+      tags: [users]
+      summary: Joriy foydalanuvchi profilini olish
+      responses:
+        '200':
+          description: Foydalanuvchi profili
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+    patch:
+      operationId: updateCurrentUser
+      tags: [users]
+      summary: Joriy foydalanuvchi profilini yangilash
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+            example:
+              displayName: "Sardor Karimov"
+      responses:
+        '200':
+          description: Profil yangilandi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /users/me/context:
+    get:
+      operationId: getCurrentUserContext
+      tags: [users]
+      summary: Joriy foydalanuvchi kontekstini olish
+      description: |
+        Clientlar uchun typed session kontekst: identity, profil, memberships,
+        capabilities va enabled features.
+        Permission/featurelar faqat UX uchun; backend authorization authoritative.
+      responses:
+        '200':
+          description: Foydalanuvchi konteksti
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserContext'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /users/{userId}:
+    get:
+      operationId: getUserById
+      tags: [users]
+      summary: Foydalanuvchi public profilini olish
+      description: |
+        Boshqa foydalanuvchining minimal public profilini qaytaradi.
+        Relationship (shipment participant, company member) bo'lsa qo'shimcha fieldlar ko'rinadi.
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Foydalanuvchi public profili
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPublicProfile'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Drivers ───────────────────────────────
+
+  /users/me/driver-profile:
+    get:
+      operationId: getMyDriverProfile
+      tags: [drivers]
+      summary: O'z haydovchi profilini olish
+      x-required-permissions: []
+      responses:
+        '200':
+          description: Haydovchi profili
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriverProfile'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          description: Haydovchi profili yaratilmagan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      operationId: createOrUpdateDriverProfile
+      tags: [drivers]
+      summary: Haydovchi profilini yaratish yoki yangilash
+      description: |
+        Agar haydovchi profili mavjud bo'lmasa yaratadi, aks holda yangilaydi.
+        Verification statusiga ta'sir qiluvchi o'zgarishlar re-review talab qilishi mumkin.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriverProfileRequest'
+            example:
+              licenseNumber: "AB1234567"
+              licenseExpiryDate: "2028-12-31"
+      responses:
+        '200':
+          description: Profil yangilandi yoki yaratildi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriverProfile'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  # ── Companies ─────────────────────────────
+
+  /companies:
+    post:
+      operationId: createCompany
+      tags: [companies]
+      summary: Kompaniya yaratish
+      description: |
+        Yangi kompaniya yaratadi. Yaratuvchi avtomatik owner a'zo bo'ladi.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCompanyRequest'
+            example:
+              legalName: "Toshkent Logistika MChJ"
+              displayName: "Toshkent Logistika"
+              businessId: "123456789"
+      responses:
+        '201':
+          description: Kompaniya yaratildi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /companies/{companyId}:
+    get:
+      operationId: getCompany
+      tags: [companies]
+      summary: Kompaniya ma'lumotlarini olish
+      description: |
+        Kompaniya profili. Active a'zo yoki authorized actor to'liq ma'lumot oladi;
+        boshqalar faqat public profilni ko'radi.
+      parameters:
+        - $ref: '#/components/parameters/CompanyId'
+      responses:
+        '200':
+          description: Kompaniya
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      operationId: updateCompany
+      tags: [companies]
+      summary: Kompaniya ma'lumotlarini yangilash
+      parameters:
+        - $ref: '#/components/parameters/CompanyId'
+      x-required-permissions: [COMPANY_EDIT]
+      x-resource-scope: company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompanyRequest'
+      responses:
+        '200':
+          description: Kompaniya yangilandi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /companies/{companyId}/members:
+    get:
+      operationId: listCompanyMembers
+      tags: [companies]
+      summary: Kompaniya a'zolarini ko'rish
+      parameters:
+        - $ref: '#/components/parameters/CompanyId'
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+      x-required-permissions: [COMPANY_MEMBER_READ]
+      x-resource-scope: company
+      responses:
+        '200':
+          description: A'zolar ro'yxati
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyMemberPage'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      operationId: addCompanyMember
+      tags: [companies]
+      summary: Kompaniyaga a'zo qo'shish
+      parameters:
+        - $ref: '#/components/parameters/CompanyId'
+      x-required-permissions: [COMPANY_MEMBER_ADD]
+      x-resource-scope: company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCompanyMemberRequest'
+            example:
+              userId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+              roleIds:
+                - "role-dispatcher-uuid"
+      responses:
+        '201':
+          description: A'zo qo'shildi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyMember'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Foydalanuvchi allaqachon a'zo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /companies/{companyId}/members/{memberId}:
+    delete:
+      operationId: removeCompanyMember
+      tags: [companies]
+      summary: Kompaniyadan a'zoni olib tashlash
+      parameters:
+        - $ref: '#/components/parameters/CompanyId'
+        - $ref: '#/components/parameters/MemberId'
+      x-required-permissions: [COMPANY_MEMBER_REMOVE]
+      x-resource-scope: company
+      responses:
+        '204':
+          description: A'zo olib tashlandi
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Oxirgi ownerni olib tashlash mumkin emas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Reference Data ────────────────────────
+
+  /config/capabilities:
+    get:
+      operationId: getFeatureCapabilities
+      tags: [reference-data]
+      summary: Platform feature va konfiguratsiya
+      description: |
+        Backend-driven feature availability va konfiguratsiya.
+        UX uchun; authorization server-side authoritative.
+      security: []
+      responses:
+        '200':
+          description: Feature capabilities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureCapabilities'
+
+  /config/supported-currencies:
+    get:
+      operationId: getSupportedCurrencies
+      tags: [reference-data]
+      summary: Qo'llab-quvvatlanadigan valyutalar
+      security: []
+      responses:
+        '200':
+          description: Valyutalar
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SupportedCurrency'
+
+  /reference/vehicle-types:
+    get:
+      operationId: listVehicleTypes
+      tags: [reference-data]
+      summary: Transport turlari ro'yxati
+      security: []
+      responses:
+        '200':
+          description: Transport turlari
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/VehicleType'
+
+  /reference/body-types:
+    get:
+      operationId: listBodyTypes
+      tags: [reference-data]
+      summary: Kuzov turlari ro'yxati
+      security: []
+      responses:
+        '200':
+          description: Kuzov turlari
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BodyType'
+
+  /reference/vehicle-capabilities:
+    get:
+      operationId: listVehicleCapabilities
+      tags: [reference-data]
+      summary: Transport qobiliyatlari ro'yxati
+      security: []
+      responses:
+        '200':
+          description: Transport qobiliyatlari
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/VehicleCapability'
+
+  # ── Vehicles ──────────────────────────────
+
+  /vehicles:
+    get:
+      operationId: listMyVehicles
+      tags: [vehicles]
+      summary: O'z transport vositalarini ko'rish
+      description: |
+        Joriy foydalanuvchi yoki uning kompaniyasiga tegishli transport vositalarini qaytaradi.
+        Company scope uchun `companyId` query parametri ishlatiladi.
+      parameters:
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Kompaniya scope uchun filter
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Transport vositalari
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehiclePage'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+    post:
+      operationId: createVehicle
+      tags: [vehicles]
+      summary: Transport vositasini ro'yxatdan o'tkazish
+      description: |
+        Yangi transport vositasini yaratadi. Owner foydalanuvchi o'zi yoki kompaniya bo'lishi mumkin.
+        Kompaniya nomidan yaratish uchun `companyId` ko'rsatiladi va tegishli permission talab qilinadi.
+      x-required-permissions: [VEHICLE_CREATE]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVehicleRequest'
+            example:
+              companyId: null
+              brand: "MAN"
+              model: "TGX 18.510"
+              year: 2022
+              plateNumber: "01A123BC"
+              vehicleTypeId: "type-truck-uuid"
+              bodyTypeId: "body-tent-uuid"
+              capacityKg: 20000
+              volumeM3: 86.0
+              capabilityIds: ["cap-refrigerated-uuid"]
+      responses:
+        '201':
+          description: Transport vositasi yaratildi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Plate raqam allaqachon mavjud
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /vehicles/{vehicleId}:
+    get:
+      operationId: getVehicle
+      tags: [vehicles]
+      summary: Transport vositasi ma'lumotlari
+      parameters:
+        - $ref: '#/components/parameters/VehicleId'
+      responses:
+        '200':
+          description: Transport vositasi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      operationId: updateVehicle
+      tags: [vehicles]
+      summary: Transport vositasini yangilash
+      parameters:
+        - $ref: '#/components/parameters/VehicleId'
+      x-required-permissions: [VEHICLE_EDIT]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVehicleRequest'
+      responses:
+        '200':
+          description: Transport vositasi yangilandi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /vehicles/{vehicleId}/images:
+    post:
+      operationId: uploadVehicleImage
+      tags: [vehicles]
+      summary: Transport vositasi rasmini yuklash
+      parameters:
+        - $ref: '#/components/parameters/VehicleId'
+      x-required-permissions: [VEHICLE_EDIT]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                displayOrder:
+                  type: integer
+                  minimum: 0
+      responses:
+        '201':
+          description: Rasm yuklandi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoadImage'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /vehicles/{vehicleId}/deactivate:
+    post:
+      operationId: deactivateVehicle
+      tags: [vehicles]
+      summary: Transport vositasini deaktivatsiya qilish
+      parameters:
+        - $ref: '#/components/parameters/VehicleId'
+      x-required-permissions: [VEHICLE_EDIT]
+      responses:
+        '200':
+          description: Deaktivatsiya qilindi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Available Vehicles ────────────────────
+
+  /available-vehicles:
+    get:
+      operationId: searchAvailableVehicles
+      tags: [available-vehicles]
+      summary: Mavjud transport vositalarini qidirish
+      description: |
+        Yaqin atrofdagi mavjud transport vositalarini PostGIS yordamida qidiradi.
+        Location minimization qo'llaniladi; exact location faqat authorized actorga.
+      parameters:
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+          description: Qidiruv markazi longitude
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+          description: Qidiruv markazi latitude
+        - name: radiusKm
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+            minimum: 1
+            maximum: 500
+          description: Qidiruv radiusi (km)
+        - name: vehicleTypeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: bodyTypeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: minCapacityKg
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+        - name: availableFrom
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Mavjud transport vositalari
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailableVehiclePage'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+    post:
+      operationId: publishAvailableVehicle
+      tags: [available-vehicles]
+      summary: Transport vositasi mavjudligini e'lon qilish
+      description: |
+        Transport vositasining hozirgi joylashuvi, yo'nalishi va mavjudlik vaqtini e'lon qiladi.
+        Faqat active va eligible transport vositasi uchun.
+      x-required-permissions: [VEHICLE_EDIT]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishAvailableVehicleRequest'
+            example:
+              vehicleId: "vehicle-uuid-123"
+              currentLocation:
+                longitude: 66.9597
+                latitude: 39.6542
+              desiredDestination:
+                longitude: 69.2401
+                latitude: 41.2995
+              availableFrom: "2026-08-22T06:00:00Z"
+              availableUntil: "2026-08-22T18:00:00Z"
+      responses:
+        '201':
+          description: Mavjudlik e'loni yaratildi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailableVehicle'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Bu transport vositasi uchun faol e'lon allaqachon mavjud
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /available-vehicles/{availableVehicleId}:
+    get:
+      operationId: getAvailableVehicle
+      tags: [available-vehicles]
+      summary: Mavjud transport e'loni tafsilotlari
+      parameters:
+        - $ref: '#/components/parameters/AvailableVehicleId'
+      responses:
+        '200':
+          description: Mavjud transport e'loni
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailableVehicle'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /available-vehicles/{availableVehicleId}/close:
+    post:
+      operationId: closeAvailableVehicle
+      tags: [available-vehicles]
+      summary: Mavjud transport e'lonini yopish
+      parameters:
+        - $ref: '#/components/parameters/AvailableVehicleId'
+      x-required-permissions: [VEHICLE_EDIT]
+      responses:
+        '200':
+          description: E'lon yopildi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailableVehicle'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: E'lon allaqachon yopilgan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Loads ─────────────────────────────────
+
+  /loads/mine:
+    get:
+      operationId: listMyLoads
+      tags: [loads]
+      summary: O'z yuklarini ko'rish
+      description: |
+        Joriy foydalanuvchining individual yoki kompaniya nomidagi yuklarini qaytaradi.
+      parameters:
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, PUBLISHED, MATCHED, CANCELLED, EXPIRED]
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Yuklar ro'yxati
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnLoadPage'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /loads:
+    get:
+      operationId: searchLoads
+      tags: [loads]
+      summary: Yuklarni qidirish (feed)
+      description: |
+        Published yuklarni PostGIS yordamida geospatial filter bilan qidiradi.
+        Faqat `PUBLISHED` statusdagi yuklar qaytariladi.
+        Location minimization qo'llaniladi.
+      parameters:
+        - name: pickupLongitude
+          in: query
+          schema:
+            type: number
+            format: double
+          description: Yuk olish nuqtasi yaqinidagi qidiruv longitude
+        - name: pickupLatitude
+          in: query
+          schema:
+            type: number
+            format: double
+          description: Yuk olish nuqtasi yaqinidagi qidiruv latitude
+        - name: radiusKm
+          in: query
+          schema:
+            type: number
+            format: double
+            minimum: 1
+            maximum: 500
+        - name: vehicleTypeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: bodyTypeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: minWeightKg
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+        - name: maxWeightKg
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+        - name: pickupFrom
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: pickupTo
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Yuklar ro'yxati
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoadPage'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+    post:
+      operationId: createLoad
+      tags: [loads]
+      summary: Yuk e'lonini yaratish
+      description: |
+        Yangi yuk e'lonini `DRAFT` statusida yaratadi.
+        Individual owner yoki kompaniya nomidan yaratilishi mumkin.
+      x-required-permissions: [LOAD_CREATE]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLoadRequest'
+            example:
+              companyId: null
+              cargo:
+                type: "Qurilish materiallari"
+                description: "Sement va g'isht"
+                weightKg: 8000
+                volumeM3: 24.0
+              stops:
+                - type: "PICKUP"
+                  sequence: 1
+                  address: "Toshkent sh., Chilonzor tumani"
+                  location:
+                    longitude: 69.2401
+                    latitude: 41.2995
+                  contactName: "Sardor"
+                  contactPhone: "+998901234567"
+                  scheduledFrom: "2026-08-25T08:00:00Z"
+                  scheduledTo: "2026-08-25T12:00:00Z"
+                - type: "DELIVERY"
+                  sequence: 2
+                  address: "Buxoro sh., Ark ko'chasi"
+                  location:
+                    longitude: 64.4176
+                    latitude: 39.7745
+                  contactName: "Jamshid"
+                  contactPhone: "+998911234567"
+                  scheduledFrom: "2026-08-26T08:00:00Z"
+                  scheduledTo: "2026-08-26T18:00:00Z"
+              requirements:
+                vehicleTypeId: "type-truck-uuid"
+                bodyTypeId: "body-tent-uuid"
+                minCapacityKg: 8000
+                capabilityIds: []
+              pricing:
+                mode: "FIXED_PRICE"
+                amount: 3000000
+                currency: "UZS"
+      responses:
+        '201':
+          description: Yuk yaratildi (DRAFT)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Load'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /loads/{loadId}:
+    get:
+      operationId: getLoad
+      tags: [loads]
+      summary: Yuk tafsilotlari
+      description: |
+        Yuk ma'lumotlarini qaytaradi. Owner, marketplace participant yoki shipment participant
+        to'liq ma'lumot oladi; boshqalar faqat published public fieldlarni ko'radi.
+      parameters:
+        - $ref: '#/components/parameters/LoadId'
+      responses:
+        '200':
+          description: Yuk
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Load'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      operationId: updateLoad
+      tags: [loads]
+      summary: Draft yukni yangilash
+      description: Faqat `DRAFT` statusdagi yuklar tahrirlanishi mumkin.
+      parameters:
+        - $ref: '#/components/parameters/LoadId'
+      x-required-permissions: [LOAD_EDIT]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLoadRequest'
+      responses:
+        '200':
+          description: Yuk yangilandi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Load'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Yukni hozirgi statusda tahrirlash mumkin emas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /loads/{loadId}/publish:
+    post:
+      operationId: publishLoad
+      tags: [loads]
+      summary: Yukni nashr qilish
+      description: |
+        `DRAFT -> PUBLISHED` transition. Nashr qilish uchun cargo, kamida bitta pickup
+        va bitta delivery stop, requirement va pricing to'ldirilgan bo'lishi kerak.
+      parameters:
+        - $ref: '#/components/parameters/LoadId'
+      x-required-permissions: [LOAD_EDIT]
+      responses:
+        '200':
+          description: Yuk nashr qilindi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Load'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Nashr uchun invariantlar bajarilmagan yoki noto'g'ri status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /loads/{loadId}/cancel:
+    post:
+      operationId: cancelLoad
+      tags: [loads]
+      summary: Yukni bekor qilish
+      description: |
+        `DRAFT -> CANCELLED` yoki `PUBLISHED -> CANCELLED` (agar winner offer yo'q bo'lsa).
+      parameters:
+        - $ref: '#/components/parameters/LoadId'
+      x-required-permissions: [LOAD_CANCEL]
+      responses:
+        '200':
+          description: Yuk bekor qilindi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Load'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Hozirgi statusda bekor qilish mumkin emas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /loads/{loadId}/images:
+    post:
+      operationId: uploadLoadImage
+      tags: [loads]
+      summary: Yuk rasmini yuklash
+      description: Faqat DRAFT statusdagi yukning egasi rasmini yuklashi mumkin.
+      parameters:
+        - $ref: '#/components/parameters/LoadId'
+      x-required-permissions: [LOAD_EDIT]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                displayOrder:
+                  type: integer
+                  minimum: 0
+      responses:
+        '201':
+          description: Rasm yuklandi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoadImage'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Offers ────────────────────────────────
+
+  /offers/mine:
+    get:
+      operationId: listMyOffers
+      tags: [offers]
+      summary: O'z takliflarini ko'rish
+      description: Joriy foydalanuvchining barcha takliflarini qaytaradi.
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, ACCEPTED, REJECTED, WITHDRAWN, EXPIRED]
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Takliflar
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfferPage'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /loads/{loadId}/offers:
+    get:
+      operationId: listOffersForLoad
+      tags: [offers]
+      summary: Yuk uchun takliflarni ko'rish
+      description: |
+        Yuk egasi barcha takliflarni ko'radi; taklif beruvchi faqat o'zining taklifini ko'radi.
+      parameters:
+        - $ref: '#/components/parameters/LoadId'
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Takliflar ro'yxati
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfferPage'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      operationId: createOffer
+      tags: [offers]
+      summary: Narx taklifi berish
+      description: |
+        `PUBLISHED` statusdagi yukka narx taklifi beradi. Taklif beruvchi eligible
+        haydovchi, eligible va active transport vositasiga ega bo'lishi kerak.
+        O'z yukiga taklif berish mumkin emas.
+      parameters:
+        - $ref: '#/components/parameters/LoadId'
+      x-required-permissions: [OFFER_CREATE]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOfferRequest'
+            example:
+              vehicleId: "vehicle-uuid-123"
+              amount: 2800000
+              currency: "UZS"
+              message: "Ertaga ertalab yetkazib beraman"
+      responses:
+        '201':
+          description: Taklif yaratildi (PENDING)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Eligibility yoki load status shartig'i bajarilmadi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /offers/{offerId}:
+    get:
+      operationId: getOffer
+      tags: [offers]
+      summary: Taklif tafsilotlari
+      parameters:
+        - $ref: '#/components/parameters/OfferId'
+      responses:
+        '200':
+          description: Taklif
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /offers/{offerId}/accept:
+    post:
+      operationId: acceptOffer
+      tags: [offers]
+      summary: Taklifni qabul qilish
+      description: |
+        `PENDING -> ACCEPTED`. Yuk egasi/scoped a'zo tomonidan bajariladi.
+        Bir transactionda: load `PUBLISHED -> MATCHED`, winner offer `ACCEPTED`,
+        qolgan pending offerlar `REJECTED`, `OfferAccepted` event yoziladi.
+        Concurrency-safe: version conflict `409` qaytaradi.
+      parameters:
+        - $ref: '#/components/parameters/OfferId'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      x-required-permissions: [OFFER_ACCEPT]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptOfferRequest'
+      responses:
+        '200':
+          description: Taklif qabul qilindi, shipment yaratiladi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Concurrency conflict — load version o'zgardi yoki boshqa taklif qabul qilindi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Taklif hozirgi statusda qabul qilinishi mumkin emas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /offers/{offerId}/reject:
+    post:
+      operationId: rejectOffer
+      tags: [offers]
+      summary: Taklifni rad etish
+      description: Yuk egasi/scoped a'zo `PENDING` taklifni rad etadi.
+      parameters:
+        - $ref: '#/components/parameters/OfferId'
+      x-required-permissions: [OFFER_ACCEPT]
+      responses:
+        '200':
+          description: Taklif rad etildi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Taklif hozirgi statusda rad etilishi mumkin emas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /offers/{offerId}/withdraw:
+    post:
+      operationId: withdrawOffer
+      tags: [offers]
+      summary: Taklifni qaytarib olish
+      description: Taklif yaratuvchisi o'zining `PENDING` taklifini qaytarib oladi.
+      parameters:
+        - $ref: '#/components/parameters/OfferId'
+      x-required-permissions: [OFFER_WITHDRAW]
+      responses:
+        '200':
+          description: Taklif qaytarib olindi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Taklif hozirgi statusda qaytarib olinishi mumkin emas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Shipments ─────────────────────────────
+
+  /shipments:
+    get:
+      operationId: listMyShipments
+      tags: [shipments]
+      summary: O'z tashishlarini ko'rish
+      description: |
+        Joriy foydalanuvchi shipper yoki assigned driver sifatida qatnashgan tashishlarni qaytaradi.
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum:
+              - CREATED
+              - DRIVER_ASSIGNED
+              - HEADING_TO_PICKUP
+              - AT_PICKUP
+              - LOADED
+              - IN_TRANSIT
+              - DELIVERED
+              - COMPLETED
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [shipper, driver]
+          description: Foydalanuvchining tashishdagi roli bo'yicha filter
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Tashishlar ro'yxati
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentPage'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /shipments/{shipmentId}:
+    get:
+      operationId: getShipment
+      tags: [shipments]
+      summary: Tashish tafsilotlari
+      description: Faqat shipment participantlari (shipper, driver) ko'ra oladi.
+      parameters:
+        - $ref: '#/components/parameters/ShipmentId'
+      responses:
+        '200':
+          description: Tashish
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Shipment'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /shipments/{shipmentId}/status:
+    post:
+      operationId: updateShipmentStatus
+      tags: [shipments]
+      summary: Tashish statusini yangilash
+      description: |
+        State machine bo'yicha keyingi statusga o'tkazadi.
+        Driver execution transitionlarni (`HEADING_TO_PICKUP` -> ... -> `DELIVERED`),
+        shipper faqat `DELIVERED -> COMPLETED` confirmationni bajaradi.
+        `expectedVersion` concurrency guard sifatida.
+      parameters:
+        - $ref: '#/components/parameters/ShipmentId'
+      x-required-permissions: [SHIPMENT_STATUS_UPDATE]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateShipmentStatusRequest'
+            example:
+              status: "HEADING_TO_PICKUP"
+              expectedVersion: 2
+      responses:
+        '200':
+          description: Status yangilandi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Shipment'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Version conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: State machine bo'yicha ruxsat etilmagan transition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /shipments/{shipmentId}/status-history:
+    get:
+      operationId: getShipmentStatusHistory
+      tags: [shipments]
+      summary: Tashish status tarixini ko'rish
+      description: Immutable status o'zgarishlar tarixini qaytaradi.
+      parameters:
+        - $ref: '#/components/parameters/ShipmentId'
+      responses:
+        '200':
+          description: Status tarixi
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ShipmentStatusHistoryEntry'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Conversations ─────────────────────────
+
+  /shipments/{shipmentId}/conversation:
+    get:
+      operationId: getShipmentConversation
+      tags: [conversations]
+      summary: Tashish uchun chatni olish
+      description: |
+        Tashish bilan bog'liq conversationni qaytaradi yoki mavjud bo'lmasa yaratadi.
+        Faqat shipment participantlari (shipper, driver) kirishi mumkin.
+      parameters:
+        - $ref: '#/components/parameters/ShipmentId'
+      responses:
+        '200':
+          description: Conversation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /conversations/{conversationId}/messages:
+    get:
+      operationId: listMessages
+      tags: [conversations]
+      summary: Chat xabarlarini ko'rish
+      description: Conversation participanti sifatida xabarlar tarixini cursor pagination bilan olish.
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Xabarlar
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessagePage'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      operationId: sendMessage
+      tags: [conversations]
+      summary: Xabar yuborish
+      description: Active conversationdagi participant sifatida xabar yuborish.
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+            example:
+              contentType: "TEXT"
+              body: "Ertalab soat 8da kelaman"
+      responses:
+        '201':
+          description: Xabar yuborildi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /conversations/{conversationId}/read:
+    post:
+      operationId: markConversationRead
+      tags: [conversations]
+      summary: Conversationni o'qilgan deb belgilash
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lastReadMessageId]
+              properties:
+                lastReadMessageId:
+                  type: string
+                  format: uuid
+      responses:
+        '204':
+          description: O'qilgan deb belgilandi
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Notifications ─────────────────────────
+
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: Bildirishnomalar ro'yxati
+      parameters:
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Bildirishnomalar
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPage'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /notifications/{notificationId}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Bildirishnomani o'qilgan deb belgilash
+      parameters:
+        - $ref: '#/components/parameters/NotificationId'
+      responses:
+        '204':
+          description: O'qilgan deb belgilandi
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /notifications/preferences:
+    get:
+      operationId: getNotificationPreferences
+      tags: [notifications]
+      summary: Bildirishnoma sozlamalarini olish
+      responses:
+        '200':
+          description: Sozlamalar
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+    put:
+      operationId: updateNotificationPreferences
+      tags: [notifications]
+      summary: Bildirishnoma sozlamalarini yangilash
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferences'
+      responses:
+        '200':
+          description: Sozlamalar yangilandi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /push-endpoints:
+    post:
+      operationId: registerPushEndpoint
+      tags: [notifications]
+      summary: Push endpoint ro'yxatdan o'tkazish
+      description: Qurilma uchun push notification tokenini ro'yxatdan o'tkazadi.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterPushEndpointRequest'
+      responses:
+        '201':
+          description: Endpoint ro'yxatdan o'tdi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PushEndpoint'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+# ─────────────────────────────────────────────
+#  Components
+# ─────────────────────────────────────────────
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Access token — Authorization: Bearer {token}"
+
+  # ── Parameters ────────────────────────────
+  parameters:
+    IdempotencyKeyHeader:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: |
+        Client-generated unique key. Birinchi request normal bajariladi va natijani
+        cache qiladi. Takroriy request (bir xil key) cached natijani qaytaradi.
+        Boshqa request body bilan bir xil key yuborilsa 409 IDEMPOTENCY_KEY_CONFLICT.
+
+    CursorParam:
+      name: cursor
+      in: query
+      schema:
+        type: string
+      description: Oldingi responsedagi `nextCursor` qiymati
+
+    LimitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Sahifa hajmi
+
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    CompanyId:
+      name: companyId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    MemberId:
+      name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    VehicleId:
+      name: vehicleId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    AvailableVehicleId:
+      name: availableVehicleId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    LoadId:
+      name: loadId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    OfferId:
+      name: offerId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    ShipmentId:
+      name: shipmentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    ConversationId:
+      name: conversationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    NotificationId:
+      name: notificationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  # ── Responses ─────────────────────────────
+  responses:
+    ValidationError:
+      description: Request validatsiyasi muvaffaqiyatsiz
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "VALIDATION_ERROR"
+              message: "So'rov validatsiyasi muvaffaqiyatsiz"
+              details:
+                fieldErrors:
+                  - field: "phone"
+                    code: "INVALID_FORMAT"
+                    message: "Telefon raqami E.164 formatida bo'lishi kerak"
+
+    Unauthenticated:
+      description: Authentication talab qilinadi
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "AUTHENTICATION_REQUIRED"
+              message: "Access token talab qilinadi"
+
+    Forbidden:
+      description: Ruxsat berilmadi
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "ACCESS_DENIED"
+              message: "Ushbu amal uchun ruxsat yo'q"
+
+    NotFound:
+      description: Resurs topilmadi
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "RESOURCE_NOT_FOUND"
+              message: "So'ralgan resurs topilmadi"
+
+    RateLimited:
+      description: So'rov chastotasi oshirildi
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "RATE_LIMIT_EXCEEDED"
+              message: "Juda ko'p so'rov yuborildi"
+
+  # ── Schemas ───────────────────────────────
+  schemas:
+
+    # ── Common ──────────────────────────────
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code (UPPER_SNAKE_CASE)
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              description: Inson uchun o'qiladigan xabar
+              example: "So'rov validatsiyasi muvaffaqiyatsiz"
+            traceId:
+              type: string
+              description: Request trace ID (debugging uchun)
+              example: "req_abc123def456"
+            details:
+              type: object
+              description: Qo'shimcha context (masalan field errors)
+              additionalProperties: true
+
+    GeoPoint:
+      type: object
+      required: [longitude, latitude]
+      properties:
+        longitude:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+          description: WGS 84 longitude
+        latitude:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+          description: WGS 84 latitude
+
+    Money:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Pul miqdori (integer, floating point emas)
+          example: 3000000
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          pattern: "^[A-Z]{3}$"
+          description: ISO 4217 currency code
+          example: "UZS"
+
+    CursorPage:
+      type: object
+      required: [hasMore]
+      properties:
+        nextCursor:
+          type: ['string', 'null']
+          description: Keyingi sahifa uchun opaque cursor; oxirgi sahifada null
+        hasMore:
+          type: boolean
+          description: Qo'shimcha ma'lumot bormi
+
+    # ── Auth ────────────────────────────────
+
+    OtpRequest:
+      type: object
+      required: [phone]
+      properties:
+        phone:
+          type: string
+          pattern: "^\\+[1-9]\\d{6,14}$"
+          description: E.164 formatdagi telefon raqami
+          example: "+998901234567"
+
+    OtpRequestResponse:
+      type: object
+      required: [otpId, expiresAt]
+      properties:
+        otpId:
+          type: string
+          format: uuid
+          description: OTP challenge identifikatori
+        expiresAt:
+          type: string
+          format: date-time
+          description: OTP amal qilish muddati (UTC)
+
+    OtpVerify:
+      type: object
+      required: [otpId, code, deviceInfo]
+      properties:
+        otpId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          minLength: 4
+          maxLength: 8
+          description: OTP kod
+        deviceInfo:
+          $ref: '#/components/schemas/DeviceInfo'
+
+    DeviceInfo:
+      type: object
+      required: [installationId, platform]
+      properties:
+        installationId:
+          type: string
+          maxLength: 255
+          description: Qurilma installation identifikatori
+        platform:
+          type: string
+          enum: [ANDROID, IOS, WEB]
+        name:
+          type: string
+          maxLength: 255
+          description: Qurilma nomi (ixtiyoriy)
+
+    AuthTokens:
+      type: object
+      required: [accessToken, refreshToken, expiresAt, user]
+      properties:
+        accessToken:
+          type: string
+          description: Qisqa umrli JWT access token
+        refreshToken:
+          type: string
+          description: Uzoq umrli refresh token (rotation bilan)
+        expiresAt:
+          type: string
+          format: date-time
+          description: Access token muddati tugash vaqti (UTC)
+        user:
+          $ref: '#/components/schemas/AuthUserSummary'
+
+    AuthUserSummary:
+      type: object
+      required: [id, isNewUser]
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: ['string', 'null']
+        isNewUser:
+          type: boolean
+          description: Foydalanuvchi birinchi marta ro'yxatdan o'tdimi
+
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+
+    SessionSummary:
+      type: object
+      required: [id, devicePlatform, issuedAt, lastUsedAt, isCurrent]
+      properties:
+        id:
+          type: string
+          format: uuid
+        deviceName:
+          type: ['string', 'null']
+        devicePlatform:
+          type: string
+          enum: [ANDROID, IOS, WEB]
+        issuedAt:
+          type: string
+          format: date-time
+        lastUsedAt:
+          type: string
+          format: date-time
+        isCurrent:
+          type: boolean
+
+    # ── Users ───────────────────────────────
+
+    UserProfile:
+      type: object
+      required: [id, status, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: ['string', 'null']
+        phone:
+          type: string
+          description: Foydalanuvchining verified telefon raqami (faqat o'zi ko'radi)
+        status:
+          type: string
+          enum: [ACTIVE, BLOCKED]
+        hasDriverProfile:
+          type: boolean
+        companies:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserCompanyMembership'
+          description: Foydalanuvchi a'zo bo'lgan kompaniyalar
+        createdAt:
+          type: string
+          format: date-time
+
+    UserPublicProfile:
+      type: object
+      required: [id, displayName]
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: ['string', 'null']
+        hasDriverProfile:
+          type: boolean
+
+    UserCompanyMembership:
+      type: object
+      required: [companyId, companyName, roles]
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        companyName:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 200
+
+    # ── Drivers ─────────────────────────────
+
+    DriverProfile:
+      type: object
+      required: [id, userId, verificationStatus, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        licenseNumber:
+          type: ['string', 'null']
+        licenseExpiryDate:
+          type: ['string', 'null']
+          format: date
+        verificationStatus:
+          type: string
+          enum: [UNVERIFIED, PENDING_REVIEW, VERIFIED, REJECTED]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    DriverProfileRequest:
+      type: object
+      properties:
+        licenseNumber:
+          type: string
+          maxLength: 50
+        licenseExpiryDate:
+          type: string
+          format: date
+
+    # ── Companies ───────────────────────────
+
+    CreateCompanyRequest:
+      type: object
+      required: [legalName, displayName]
+      properties:
+        legalName:
+          type: string
+          minLength: 1
+          maxLength: 500
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        businessId:
+          type: string
+          maxLength: 100
+          description: Biznes identifikatori (INN va h.k.)
+
+    UpdateCompanyRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        businessId:
+          type: string
+          maxLength: 100
+
+    Company:
+      type: object
+      required: [id, legalName, displayName, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        legalName:
+          type: string
+        displayName:
+          type: string
+        businessId:
+          type: ['string', 'null']
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CompanyMember:
+      type: object
+      required: [id, userId, displayName, roles, joinedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        displayName:
+          type: ['string', 'null']
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleSummary'
+        joinedAt:
+          type: string
+          format: date-time
+
+    CompanyMemberPage:
+      allOf:
+        - $ref: '#/components/schemas/CursorPage'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/CompanyMember'
+
+    AddCompanyMemberRequest:
+      type: object
+      required: [userId, roleIds]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        roleIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 1
+
+    RoleSummary:
+      type: object
+      required: [id, code, label]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          description: Barqaror role code
+        label:
+          type: string
+
+    # ── Reference Data ──────────────────────
+
+    VehicleType:
+      type: object
+      required: [id, code, label]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        label:
+          type: string
+
+    BodyType:
+      type: object
+      required: [id, code, label]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        label:
+          type: string
+
+    VehicleCapability:
+      type: object
+      required: [id, code, label]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        label:
+          type: string
+
+    # ── Vehicles ────────────────────────────
+
+    CreateVehicleRequest:
+      type: object
+      required: [brand, model, year, plateNumber, vehicleTypeId, bodyTypeId, capacityKg]
+      properties:
+        companyId:
+          type: ['string', 'null']
+          format: uuid
+          description: Agar kompaniya nomidan yaratilsa
+        brand:
+          type: string
+          maxLength: 100
+        model:
+          type: string
+          maxLength: 100
+        year:
+          type: integer
+          minimum: 1970
+          maximum: 2100
+        plateNumber:
+          type: string
+          maxLength: 20
+          description: Davlat raqami
+        vehicleTypeId:
+          type: string
+          format: uuid
+        bodyTypeId:
+          type: string
+          format: uuid
+        capacityKg:
+          type: integer
+          minimum: 1
+          description: Yuk ko'tarish qobiliyati (kg)
+        volumeM3:
+          type: number
+          format: double
+          minimum: 0
+          description: Yuk hajmi (m3)
+        capabilityIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Qo'shimcha qobiliyatlar
+
+    UpdateVehicleRequest:
+      type: object
+      properties:
+        brand:
+          type: string
+          maxLength: 100
+        model:
+          type: string
+          maxLength: 100
+        year:
+          type: integer
+          minimum: 1970
+          maximum: 2100
+        plateNumber:
+          type: string
+          maxLength: 20
+        vehicleTypeId:
+          type: string
+          format: uuid
+        bodyTypeId:
+          type: string
+          format: uuid
+        capacityKg:
+          type: integer
+          minimum: 1
+        volumeM3:
+          type: number
+          format: double
+          minimum: 0
+        capabilityIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    Vehicle:
+      type: object
+      required:
+        - id
+        - brand
+        - model
+        - year
+        - plateNumber
+        - vehicleType
+        - bodyType
+        - capacityKg
+        - status
+        - verificationStatus
+        - version
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        ownerUserId:
+          type: ['string', 'null']
+          format: uuid
+        managerCompanyId:
+          type: ['string', 'null']
+          format: uuid
+        brand:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        plateNumber:
+          type: string
+        vehicleType:
+          $ref: '#/components/schemas/VehicleType'
+        bodyType:
+          $ref: '#/components/schemas/BodyType'
+        capacityKg:
+          type: integer
+        volumeM3:
+          type: ['number', 'null']
+          format: double
+        capabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/VehicleCapability'
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, ARCHIVED]
+        verificationStatus:
+          type: string
+          enum: [UNVERIFIED, PENDING_REVIEW, VERIFIED, REJECTED]
+        version:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    VehiclePage:
+      allOf:
+        - $ref: '#/components/schemas/CursorPage'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Vehicle'
+
+    # ── Available Vehicles ──────────────────
+
+    PublishAvailableVehicleRequest:
+      type: object
+      required: [vehicleId, currentLocation, availableFrom, availableUntil]
+      properties:
+        vehicleId:
+          type: string
+          format: uuid
+        currentLocation:
+          $ref: '#/components/schemas/GeoPoint'
+        desiredDestination:
+          $ref: '#/components/schemas/GeoPoint'
+        availableFrom:
+          type: string
+          format: date-time
+        availableUntil:
+          type: string
+          format: date-time
+
+    AvailableVehicle:
+      type: object
+      required: [id, vehicleId, status, availableFrom, availableUntil, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        vehicleId:
+          type: string
+          format: uuid
+        vehicleSummary:
+          $ref: '#/components/schemas/AvailableVehicleVehicleSummary'
+        currentLocation:
+          $ref: '#/components/schemas/GeoPoint'
+          description: Faqat authorized actorga exact location; feedda coarse/omitted
+        desiredDestination:
+          $ref: '#/components/schemas/GeoPoint'
+        status:
+          type: string
+          enum: [ACTIVE, CLOSED, EXPIRED]
+        availableFrom:
+          type: string
+          format: date-time
+        availableUntil:
+          type: string
+          format: date-time
+        distanceKm:
+          type: ['number', 'null']
+          format: double
+          description: Qidiruv nuqtasidan masofa (faqat search natijasida)
+        createdAt:
+          type: string
+          format: date-time
+
+    AvailableVehicleVehicleSummary:
+      type: object
+      required: [id, brand, model, vehicleType, bodyType, capacityKg]
+      properties:
+        id:
+          type: string
+          format: uuid
+        brand:
+          type: string
+        model:
+          type: string
+        vehicleType:
+          $ref: '#/components/schemas/VehicleType'
+        bodyType:
+          $ref: '#/components/schemas/BodyType'
+        capacityKg:
+          type: integer
+        volumeM3:
+          type: ['number', 'null']
+          format: double
+
+    AvailableVehiclePage:
+      allOf:
+        - $ref: '#/components/schemas/CursorPage'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/AvailableVehicle'
+
+    # ── Loads ───────────────────────────────
+
+    CreateLoadRequest:
+      type: object
+      required: [cargo, stops, pricing]
+      properties:
+        companyId:
+          type: ['string', 'null']
+          format: uuid
+          description: Kompaniya nomidan yaratish uchun
+        cargo:
+          $ref: '#/components/schemas/CargoInput'
+        stops:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoadStopInput'
+          minItems: 2
+          description: Kamida bitta PICKUP va bitta DELIVERY
+        requirements:
+          $ref: '#/components/schemas/LoadRequirementsInput'
+        pricing:
+          $ref: '#/components/schemas/LoadPricingInput'
+
+    UpdateLoadRequest:
+      type: object
+      properties:
+        cargo:
+          $ref: '#/components/schemas/CargoInput'
+        stops:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoadStopInput'
+          minItems: 2
+        requirements:
+          $ref: '#/components/schemas/LoadRequirementsInput'
+        pricing:
+          $ref: '#/components/schemas/LoadPricingInput'
+
+    CargoInput:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          maxLength: 200
+          description: Yuk turi
+        description:
+          type: string
+          maxLength: 2000
+        weightKg:
+          type: integer
+          minimum: 1
+        volumeM3:
+          type: number
+          format: double
+          minimum: 0
+        quantity:
+          type: integer
+          minimum: 1
+
+    LoadStopInput:
+      type: object
+      required: [type, sequence, address, location]
+      properties:
+        type:
+          type: string
+          enum: [PICKUP, DELIVERY, INTERMEDIATE]
+        sequence:
+          type: integer
+          minimum: 1
+          description: Stop tartibi (load ichida unique)
+        address:
+          type: string
+          maxLength: 500
+        location:
+          $ref: '#/components/schemas/GeoPoint'
+        contactName:
+          type: string
+          maxLength: 200
+        contactPhone:
+          type: string
+          maxLength: 20
+        scheduledFrom:
+          type: string
+          format: date-time
+        scheduledTo:
+          type: string
+          format: date-time
+
+    LoadRequirementsInput:
+      type: object
+      properties:
+        vehicleTypeId:
+          type: string
+          format: uuid
+        bodyTypeId:
+          type: string
+          format: uuid
+        minCapacityKg:
+          type: integer
+          minimum: 0
+        minVolumeM3:
+          type: number
+          format: double
+          minimum: 0
+        capabilityIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    LoadPricingInput:
+      type: object
+      required: [mode]
+      properties:
+        mode:
+          type: string
+          enum: [FIXED_PRICE, REQUEST_OFFERS]
+        amount:
+          type: integer
+          format: int64
+          minimum: 0
+          description: FIXED_PRICE da majburiy
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+          description: FIXED_PRICE da majburiy
+
+    Load:
+      type: object
+      required: [id, status, cargo, stops, pricing, version, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        ownerUserId:
+          type: ['string', 'null']
+          format: uuid
+        ownerCompanyId:
+          type: ['string', 'null']
+          format: uuid
+        status:
+          type: string
+          enum: [DRAFT, PUBLISHED, MATCHED, CANCELLED, EXPIRED]
+        cargo:
+          $ref: '#/components/schemas/Cargo'
+        stops:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoadStop'
+        requirements:
+          $ref: '#/components/schemas/LoadRequirements'
+        pricing:
+          $ref: '#/components/schemas/LoadPricing'
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoadImage'
+        acceptedOfferId:
+          type: ['string', 'null']
+          format: uuid
+          description: MATCHED statusida winning offer IDsi
+        version:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        publishedAt:
+          type: ['string', 'null']
+          format: date-time
+        matchedAt:
+          type: ['string', 'null']
+          format: date-time
+
+    Cargo:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+        description:
+          type: ['string', 'null']
+        weightKg:
+          type: ['integer', 'null']
+        volumeM3:
+          type: ['number', 'null']
+          format: double
+        quantity:
+          type: ['integer', 'null']
+
+    LoadStop:
+      type: object
+      required: [id, type, sequence, address, location]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [PICKUP, DELIVERY, INTERMEDIATE]
+        sequence:
+          type: integer
+        address:
+          type: string
+        location:
+          $ref: '#/components/schemas/GeoPoint'
+        contactName:
+          type: ['string', 'null']
+          description: Faqat owner/participant ko'radi
+        contactPhone:
+          type: ['string', 'null']
+          description: Faqat owner/participant ko'radi
+        scheduledFrom:
+          type: ['string', 'null']
+          format: date-time
+        scheduledTo:
+          type: ['string', 'null']
+          format: date-time
+
+    LoadRequirements:
+      type: object
+      properties:
+        vehicleType:
+          $ref: '#/components/schemas/VehicleType'
+        bodyType:
+          $ref: '#/components/schemas/BodyType'
+        minCapacityKg:
+          type: ['integer', 'null']
+        minVolumeM3:
+          type: ['number', 'null']
+          format: double
+        capabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/VehicleCapability'
+
+    LoadPricing:
+      type: object
+      required: [mode]
+      properties:
+        mode:
+          type: string
+          enum: [FIXED_PRICE, REQUEST_OFFERS]
+        amount:
+          type: ['integer', 'null']
+          format: int64
+        currency:
+          type: ['string', 'null']
+
+    LoadImage:
+      type: object
+      required: [id, displayOrder, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          description: Scoped signed URL (qisqa umrli)
+        displayOrder:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    LoadSummary:
+      type: object
+      description: Feed uchun qisqartirilgan yuk ma'lumoti
+      required: [id, status, cargoType, pickupAddress, deliveryAddress, pricing, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [PUBLISHED]
+        cargoType:
+          type: string
+        cargoWeightKg:
+          type: ['integer', 'null']
+        pickupAddress:
+          type: string
+        pickupLocation:
+          $ref: '#/components/schemas/GeoPoint'
+          description: Minimized precision feedda
+        deliveryAddress:
+          type: string
+        deliveryLocation:
+          $ref: '#/components/schemas/GeoPoint'
+          description: Minimized precision feedda
+        distanceKm:
+          type: ['number', 'null']
+          format: double
+          description: Qidiruv nuqtasidan pickup masofasi
+        requirements:
+          $ref: '#/components/schemas/LoadRequirements'
+        pricing:
+          $ref: '#/components/schemas/LoadPricing'
+        scheduledPickupFrom:
+          type: ['string', 'null']
+          format: date-time
+        publishedAt:
+          type: ['string', 'null']
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    LoadPage:
+      allOf:
+        - $ref: '#/components/schemas/CursorPage'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/LoadSummary'
+
+    # ── Offers ──────────────────────────────
+
+    CreateOfferRequest:
+      type: object
+      required: [vehicleId, amount, currency]
+      properties:
+        vehicleId:
+          type: string
+          format: uuid
+        amount:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Taklif narxi (integer, floating point emas)
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+        message:
+          type: string
+          maxLength: 1000
+          description: Ixtiyoriy xabar
+
+    AcceptOfferRequest:
+      type: object
+      properties:
+        expectedLoadVersion:
+          type: integer
+          format: int64
+          description: Load concurrency guard uchun kutilgan version
+
+    Offer:
+      type: object
+      required:
+        - id
+        - loadId
+        - status
+        - amount
+        - currency
+        - version
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        loadId:
+          type: string
+          format: uuid
+        creatorUserId:
+          type: string
+          format: uuid
+        creatorCompanyId:
+          type: ['string', 'null']
+          format: uuid
+        driverProfileId:
+          type: string
+          format: uuid
+        vehicleId:
+          type: string
+          format: uuid
+        amount:
+          type: integer
+          format: int64
+        currency:
+          type: string
+        message:
+          type: ['string', 'null']
+        status:
+          type: string
+          enum: [PENDING, ACCEPTED, REJECTED, WITHDRAWN, EXPIRED]
+        version:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    OfferPage:
+      allOf:
+        - $ref: '#/components/schemas/CursorPage'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Offer'
+
+    # ── Shipments ───────────────────────────
+
+    UpdateShipmentStatusRequest:
+      type: object
+      required: [status, expectedVersion]
+      properties:
+        status:
+          type: string
+          enum:
+            - HEADING_TO_PICKUP
+            - AT_PICKUP
+            - LOADED
+            - IN_TRANSIT
+            - DELIVERED
+            - COMPLETED
+          description: Target status (state machine bo'yicha valid transition bo'lishi kerak)
+        expectedVersion:
+          type: integer
+          format: int64
+          description: Concurrency guard — joriy shipment version
+
+    Shipment:
+      type: object
+      required:
+        - id
+        - offerId
+        - loadId
+        - status
+        - acceptedPrice
+        - version
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        offerId:
+          type: string
+          format: uuid
+        loadId:
+          type: string
+          format: uuid
+        shipperUserId:
+          type: ['string', 'null']
+          format: uuid
+        shipperCompanyId:
+          type: ['string', 'null']
+          format: uuid
+        assignment:
+          $ref: '#/components/schemas/ShipmentAssignment'
+        acceptedPrice:
+          $ref: '#/components/schemas/Money'
+        status:
+          type: string
+          enum:
+            - CREATED
+            - DRIVER_ASSIGNED
+            - HEADING_TO_PICKUP
+            - AT_PICKUP
+            - LOADED
+            - IN_TRANSIT
+            - DELIVERED
+            - COMPLETED
+        stops:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShipmentStop'
+          description: Execution uchun load stoplari snapshot
+        version:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        assignedAt:
+          type: ['string', 'null']
+          format: date-time
+        deliveredAt:
+          type: ['string', 'null']
+          format: date-time
+        completedAt:
+          type: ['string', 'null']
+          format: date-time
+
+    ShipmentAssignment:
+      type: object
+      required: [driverUserId, driverProfileId, vehicleId]
+      properties:
+        driverUserId:
+          type: string
+          format: uuid
+        driverProfileId:
+          type: string
+          format: uuid
+        carrierCompanyId:
+          type: ['string', 'null']
+          format: uuid
+        vehicleId:
+          type: string
+          format: uuid
+
+    ShipmentStop:
+      type: object
+      required: [id, type, sequence, address, location]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [PICKUP, DELIVERY, INTERMEDIATE]
+        sequence:
+          type: integer
+        address:
+          type: string
+        location:
+          $ref: '#/components/schemas/GeoPoint'
+        contactName:
+          type: ['string', 'null']
+        contactPhone:
+          type: ['string', 'null']
+        scheduledFrom:
+          type: ['string', 'null']
+          format: date-time
+        scheduledTo:
+          type: ['string', 'null']
+          format: date-time
+
+    ShipmentStatusHistoryEntry:
+      type: object
+      required: [id, previousStatus, newStatus, changedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        previousStatus:
+          type: ['string', 'null']
+          description: Birinchi entry uchun null
+        newStatus:
+          type: string
+          enum:
+            - CREATED
+            - DRIVER_ASSIGNED
+            - HEADING_TO_PICKUP
+            - AT_PICKUP
+            - LOADED
+            - IN_TRANSIT
+            - DELIVERED
+            - COMPLETED
+        actorUserId:
+          type: ['string', 'null']
+          format: uuid
+          description: "null = system action"
+        reasonCode:
+          type: ['string', 'null']
+        changedAt:
+          type: string
+          format: date-time
+
+    ShipmentSummary:
+      type: object
+      required: [id, status, acceptedPrice, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        loadId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - CREATED
+            - DRIVER_ASSIGNED
+            - HEADING_TO_PICKUP
+            - AT_PICKUP
+            - LOADED
+            - IN_TRANSIT
+            - DELIVERED
+            - COMPLETED
+        acceptedPrice:
+          $ref: '#/components/schemas/Money'
+        pickupAddress:
+          type: string
+        deliveryAddress:
+          type: string
+        assignment:
+          $ref: '#/components/schemas/ShipmentAssignment'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ShipmentPage:
+      allOf:
+        - $ref: '#/components/schemas/CursorPage'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/ShipmentSummary'
+
+    # ── Conversations ───────────────────────
+
+    Conversation:
+      type: object
+      required: [id, shipmentId, status, participants, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        shipmentId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [ACTIVE, CLOSED]
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationParticipant'
+        unreadCount:
+          type: integer
+          minimum: 0
+          description: Joriy foydalanuvchi uchun o'qilmagan xabarlar soni
+        createdAt:
+          type: string
+          format: date-time
+
+    ConversationParticipant:
+      type: object
+      required: [userId, role]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        displayName:
+          type: ['string', 'null']
+        role:
+          type: string
+          enum: [SHIPPER, DRIVER]
+
+    SendMessageRequest:
+      type: object
+      required: [contentType, body]
+      properties:
+        contentType:
+          type: string
+          enum: [TEXT]
+          description: Xabar turi (v1 da faqat TEXT)
+        body:
+          type: string
+          minLength: 1
+          maxLength: 4000
+
+    Message:
+      type: object
+      required: [id, conversationId, senderUserId, contentType, body, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        conversationId:
+          type: string
+          format: uuid
+        senderUserId:
+          type: string
+          format: uuid
+        contentType:
+          type: string
+          enum: [TEXT]
+        body:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    MessagePage:
+      allOf:
+        - $ref: '#/components/schemas/CursorPage'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Message'
+
+    # ── Notifications ───────────────────────
+
+    Notification:
+      type: object
+      required: [id, type, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          description: "Bildirishnoma turi (masalan: OFFER_CREATED, OFFER_ACCEPTED, SHIPMENT_STATUS_CHANGED)"
+        title:
+          type: string
+        body:
+          type: string
+        sourceType:
+          type: ['string', 'null']
+          description: "Manba turi (masalan: LOAD, OFFER, SHIPMENT)"
+        sourceId:
+          type: ['string', 'null']
+          format: uuid
+          description: Manba resource IDsi
+        readAt:
+          type: ['string', 'null']
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    NotificationPage:
+      allOf:
+        - $ref: '#/components/schemas/CursorPage'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Notification'
+
+    NotificationPreferences:
+      type: object
+      properties:
+        channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChannelPreference'
+
+    ChannelPreference:
+      type: object
+      required: [channel, notificationType, enabled]
+      properties:
+        channel:
+          type: string
+          enum: [PUSH, SMS]
+        notificationType:
+          type: string
+          description: Bildirishnoma turi
+        enabled:
+          type: boolean
+
+    RegisterPushEndpointRequest:
+      type: object
+      required: [deviceId, provider, token]
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+          description: Auth device IDsi
+        provider:
+          type: string
+          enum: [FCM]
+          description: Push provider
+        token:
+          type: string
+          maxLength: 4096
+          description: Provider push token
+
+    PushEndpoint:
+      type: object
+      required: [id, deviceId, provider, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        deviceId:
+          type: string
+          format: uuid
+        provider:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── User Context ────────────────────────
+
+    UserContext:
+      type: object
+      required: [user, permissions, features]
+      properties:
+        user:
+          $ref: '#/components/schemas/UserProfile'
+        driverProfile:
+          $ref: '#/components/schemas/DriverProfileSummary'
+        companies:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserCompanyContext'
+        permissions:
+          type: array
+          items:
+            type: string
+          description: Effective global permission codlari (faqat UX uchun)
+        features:
+          $ref: '#/components/schemas/FeatureCapabilities'
+
+    DriverProfileSummary:
+      type: object
+      required: [id, verificationStatus]
+      properties:
+        id:
+          type: string
+          format: uuid
+        verificationStatus:
+          type: string
+          enum: [UNVERIFIED, PENDING_REVIEW, VERIFIED, REJECTED]
+
+    UserCompanyContext:
+      type: object
+      required: [companyId, companyName, memberId, roles, permissions]
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        companyName:
+          type: string
+        memberId:
+          type: string
+          format: uuid
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleSummary'
+        permissions:
+          type: array
+          items:
+            type: string
+          description: Company-scoped effective permission codlari (faqat UX uchun)
+
+    # ── Feature Capabilities ────────────────
+
+    FeatureCapabilities:
+      type: object
+      properties:
+        liveTracking:
+          type: boolean
+          default: false
+        payments:
+          type: boolean
+          default: false
+        companyAccounts:
+          type: boolean
+          default: true
+        telegramIntegration:
+          type: boolean
+          default: false
+        ratings:
+          type: boolean
+          default: false
+      description: Backend-driven feature availability (UX uchun; authorization server-side)
+
+    SupportedCurrency:
+      type: object
+      required: [code, label, isDefault]
+      properties:
+        code:
+          type: string
+          pattern: "^[A-Z]{3}$"
+          example: "UZS"
+        label:
+          type: string
+          example: "O'zbek so'mi"
+        isDefault:
+          type: boolean
+
+    # ── Own Load Page ───────────────────────
+
+    OwnLoadPage:
+      allOf:
+        - $ref: '#/components/schemas/CursorPage'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Load'
