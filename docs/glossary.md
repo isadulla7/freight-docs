@@ -6,7 +6,9 @@
 | Yuk egasi (shipper) | Yuk tashishga ehtiyoji bor tomon |
 | Tashuvchi (carrier) | Yukni tashish imkoniyatini taklif qiladigan tomon |
 | Yuk (load) | Tashish uchun e’lon qilinadigan yuk va uning shartlari |
+| Mavjud transport (`AvailableVehicle`) | Transportning ma’lum vaqt va joydagi mavjudlik bayonoti |
 | Yo‘nalish (route) | Boshlanish va manzil nuqtalari orasidagi tashish yo‘li |
 | Taklif (offer/bid) | Tashish shartlari bo‘yicha tomonlardan birining taklifi |
+| Tashish (`Shipment`) | Taklif qabul qilingach yaratiladigan real bajarilish jarayoni |
 
 Bu ta’riflar domen qarorlari bilan aniqlashtiriladi. Atamalar kod, API va foydalanuvchi interfeysida bir xil ma’noda ishlatilishi kerak.

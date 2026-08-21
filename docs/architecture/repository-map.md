@@ -1,12 +1,14 @@
 # Repository strategiyasi
 
+Qabul qilingan qaror: [ADR-0009](decisions/0009-repository-strategy.md).
+
 ## Qabul qilingan boshlanish
 
 `freight-docs` birinchi repository bo‘lib, barcha repositorylarga ta’sir qiladigan qarorlarni saqlaydi.
 
 ## Rejalashtirilgan repositorylar
 
-Quyidagi nomlar ishchi taklifdir; ular tegishli arxitektura qarorlari tasdiqlangach yaratiladi.
+Quyidagi repository chegaralari boshlang‘ich reja sifatida qabul qilingan. `freight-docs` hozir yaratildi; qolganlari tegishli ish boshlanganda yaratiladi.
 
 | Repository | Mas’uliyat | Holat |
 | --- | --- | --- |
@@ -14,8 +16,16 @@ Quyidagi nomlar ishchi taklifdir; ular tegishli arxitektura qarorlari tasdiqlang
 | `freight-backend` | Kotlin/Spring Boot modul monolit va OpenAPI | Rejalashtirilgan |
 | `freight-mobile` | Flutter mobil ilova | Rejalashtirilgan |
 | `freight-web` | Next.js/React/TypeScript web ilova | Rejalashtirilgan |
+| `freight-infrastructure` | Docker Compose, reverse proxy, deployment, backup, monitoring va muhit konfiguratsiyasi | Rejalashtirilgan |
+| `freight-contracts` | OpenAPI artefaktlari va typed client generatsiyasi | Rejalashtirilgan |
 
-Docker Compose avval uni ishlatadigan asosiy repositoryda saqlanadi. Alohida `freight-infra` repository faqat mustaqil deployment/infratuzilma hayot sikli zarur bo‘lsa yaratiladi. Bu ortiqcha repository va sinxronlash murakkabligini oldini oladi.
+`freight-contracts` faqat shartnomalar va client generatsiyasiga egalik qiladi; biznes modeli yoki umumiy utilitalar uchun dumping ground bo‘lmaydi. `freight-infrastructure` application kodini saqlamaydi.
+
+## Branching
+
+- `main` doimo deploy qilish mumkin bo‘lgan holatda saqlanadi;
+- qisqa umrli `feature/*` va `fix/*` branchlar ishlatiladi;
+- doimiy ajralib ketuvchi `develop` branch faqat aniq release-management ehtiyoji paydo bo‘lsa qo‘shiladi.
 
 ## Chegara qoidalari
 
