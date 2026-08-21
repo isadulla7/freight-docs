@@ -27,12 +27,4 @@ flowchart LR
 
 ## Ochiq savollar
 
-Quyidagilar mavjud arxitektura suhbatidan ko‘chirilgach alohida qaror sifatida qayd etiladi:
-
-- foydalanuvchi rollari va ishonch modeli;
-- buyurtma, taklif, bronlash va bajarish jarayonlari;
-- account recovery va telefon raqamini almashtirish xavfsizlik oqimi;
-- real vaqt yangilanishlari va bildirishnomalar;
-- to‘lov va komissiya modeli;
-- geolokatsiyani yig‘ish, saqlash muddati va ko‘rish huquqlari;
-- audit va nizolarni hal qilish talablari.
+Role/permission, Load/Offer/Shipment lifecycle, geospatial representation va audit baseline Architecture v1.0’da lock qilingan. Haqiqatan ochiq feature/product/legal qarorlar yagona [open questions register](open-questions.md)da saqlanadi.

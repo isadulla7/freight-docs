@@ -590,9 +590,7 @@ future multi-stop routes must be possible.
 - type
 - sequence
 - address
-- latitude
-- longitude
-- geospatial location
+- geospatial location (`geography(Point,4326)` authoritative; latitude/longitude API projectionda)
 - contact name
 - contact phone
 - scheduled time
@@ -628,12 +626,12 @@ Permissions should be capability-based, e.g.:
 
 - LOAD_CREATE
 - LOAD_EDIT
-- LOAD_DELETE
+- LOAD_CANCEL
 - OFFER_CREATE
 - OFFER_ACCEPT
 - VEHICLE_CREATE
 - COMPANY_MEMBER_ADD
-- DOCUMENT_VERIFY
+- DRIVER_VERIFY
 - etc.
 
 Authorization decisions must be server-side.
@@ -2063,30 +2061,14 @@ Do NOT jump directly into product feature coding before the baseline is clean.
 
 Recommended order:
 
-1. Commit this Architecture Context v1.0 into `freight-docs`.
-2. Review existing docs for duplication/conflict and align them.
-3. Add missing ADRs for:
-   - frontend stack,
-   - OpenAPI contract,
-   - Spring Modulith,
-   - privacy/security baseline,
-   - repository strategy.
-4. Finalize domain boundaries:
-   - identity
-   - accounts
-   - fleet
-   - freight
-   - marketplace
-   - shipment
-   - communication
-5. Finalize domain entities/aggregates.
-6. Finalize state machines.
-7. Create database ERD.
-8. Define API conventions and initial OpenAPI skeleton.
-9. Create `freight-backend`.
-10. Create clean backend skeleton with architecture tests.
-11. Add local infrastructure through `freight-infrastructure`.
-12. Only then begin first real MVP feature.
+1. Review and merge the Architecture v1.0 Lock PR.
+2. Only after merge, create the planned contract/backend repositories according to ADR-0009.
+3. Define the initial OpenAPI skeleton in `freight-contracts`.
+4. Create the clean backend foundation with module/architecture tests.
+5. Create local runtime in `freight-infrastructure` when backend foundation needs it.
+6. Only then begin the first real MVP feature.
+
+Module boundaries, aggregates, state machines, event catalog, database ERD/ownership, authorization, privacy classification and threat review are completed by the Architecture v1.0 Lock linked in section 87.
 
 ---
 
@@ -2140,3 +2122,20 @@ If a decision conflicts with this document:
 - update the context after the decision is accepted.
 
 This file should evolve as the project evolves.
+
+---
+
+# 87. Architecture v1.0 Lock
+
+Architecture v1.0 implementation-level lock canonical prinsiplarni takrorlamaydigan focused hujjatlarda saqlanadi:
+
+- [module boundaries va dependency matrix](../docs/architecture/module-boundaries.md);
+- [aggregate/domain model](../docs/architecture/domain-model.md) va [non-negotiable invariantlar](../docs/architecture/domain-invariants.md);
+- [Load/Offer/Shipment state machines](../docs/architecture/state-machines.md);
+- [cross-module event katalogi](../docs/architecture/event-catalog.md);
+- [Database ERD v1](../docs/architecture/database-erd.md) va [module/table ownership](../docs/architecture/database-ownership.md);
+- [authorization va audit modeli](../docs/architecture/authorization-model.md);
+- [privacy classification](../docs/privacy/data-inventory.md) va [MVP threat review](../docs/security/threat-review-v1.md);
+- [genuinely unresolved questions](../docs/architecture/open-questions.md).
+
+Architecture-significant lock qarorlari ADR-0012—ADR-0015da. Backend foundationni bloklaydigan ochiq architecture qarori yo‘q. Shu lock pull request review va merge qilinmaguncha application code yoki yangi backend/mobile/web/infrastructure repository boshlanmaydi.

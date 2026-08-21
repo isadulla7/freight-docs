@@ -2,6 +2,8 @@
 
 Qabul qilingan umumiy qaror: [ADR-0010](../architecture/decisions/0010-privacy-and-security-baseline.md).
 
+Entity/table/field classification va `OPEN LEGAL DECISION`lar [data inventory](data-inventory.md)da authoritative tarzda saqlanadi.
+
 Maxfiylik release oxiridagi hujjat emas, arxitektura talabidir.
 
 Har bir yangi personal-data maydoni yoki feature uchun quyidagilar aniqlanadi:
