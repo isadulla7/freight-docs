@@ -9,9 +9,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Current architecture version | `v1.0` |
 | Authoritative `main` | Resolve the current SHA from GitHub; repository state is authoritative |
 | Latest completed architecture gate | Architecture v1.0 Lock |
-| Current task | `[3.4D] Backend Foundation closure gate - CURRENT` |
-| Last completed backend checkpoint | `[3.4C] API error contract foundation - COMPLETE` |
-| Next task | Complete and review Backend Foundation 3.4D |
+| Current task | `[4] Local Infrastructure - NEXT` |
+| Last completed backend checkpoint | `[3.4D] Backend Foundation closure gate - COMPLETE` |
+| Next task | Select and confirm the first bounded Phase 4 subtask — see [`tasks/004-local-infrastructure.md`](tasks/004-local-infrastructure.md) |
 
 ## Roadmap
 
@@ -21,8 +21,8 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 1 | Architecture v1.0 Lock | **COMPLETE** |
 | 1.5 | Agent Handoff System | **COMPLETE** |
 | 2 | API Contract v1 | **COMPLETE** |
-| 3 | Backend Foundation | **IN PROGRESS** |
-| 4 | Local Infrastructure | **PENDING** |
+| 3 | Backend Foundation | **COMPLETE** |
+| 4 | Local Infrastructure | **NEXT** |
 | 5 | Identity/Auth | **PENDING** |
 | 6 | Accounts | **PENDING** |
 | 7 | Fleet | **PENDING** |
@@ -44,4 +44,4 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 3.4A | CI foundation | **COMPLETE** |
 | 3.4B | Redis foundation | **COMPLETE** |
 | 3.4C | API error contract foundation | **COMPLETE** |
-| 3.4D | Backend Foundation closure gate | **CURRENT** |
+| 3.4D | Backend Foundation closure gate | **COMPLETE** |
