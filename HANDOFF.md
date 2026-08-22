@@ -1,13 +1,13 @@
-﻿# Current handoff
+# Current handoff
 
 | Field | Value |
 | --- | --- |
-| Repository | isadulla7/freight-docs |
-| Current branch | docs/sync-backend-foundation-status |
-| Base branch | main |
-| Current phase | [3] Backend Foundation - IN PROGRESS |
-| Current checkpoint | [3.4] CURRENT |
-| Last completed checkpoint | [3.3B] PostgreSQL/PostGIS integration validation |
+| Repository | `isadulla7/freight-docs` |
+| Current branch | `docs/task-003-backend-foundation` |
+| Base branch | `main` |
+| Current phase | `[3] Backend Foundation - IN PROGRESS` |
+| Current checkpoint | `[3.4A] CI foundation - CURRENT` |
+| Last completed checkpoint | `[3.3B] PostgreSQL/PostGIS integration validation` |
 
 ## Work state
 
@@ -18,14 +18,16 @@
 - Backend Foundation 3.3A is COMPLETE.
 - Backend Foundation 3.3B is COMPLETE.
 - Backend integration validation runs successfully with Docker/Testcontainers/PostGIS after the second-startup test fix.
+- Backend Foundation 3.4A is the current bounded task.
 - No Identity/Auth or business-domain implementation has started.
 
 ## Exact next action
 
-Select and execute the bounded Backend Foundation 3.4 subtask.
+Complete Backend Foundation 3.4A CI foundation.
 
 Before coding:
-- inspect current reight-backend main
+
+- inspect current `freight-backend` main
 - confirm open PR state
 - keep the task small
 - preserve Spring Modulith boundaries
