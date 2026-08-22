@@ -1,37 +1,36 @@
 # Next task
 
-Backend Foundation (phase 3) and Local Infrastructure (phase 4) are both COMPLETE. Identity/Auth (phase 5) is IN PROGRESS.
+Backend Foundation (phase 3) and Local Infrastructure (phase 4) are both COMPLETE. Identity/Auth (phase 5)'s accounts-independent slice is COMPLETE; the two remaining pieces are BLOCKED pending a decision this session was not authorized to make unilaterally.
 
 - **Current phase:** Identity/Auth
-- **Last completed checkpoint:** `5.4` `Authenticate` public application API ([freight-backend#17](https://github.com/isadulla7/freight-backend/pull/17), merged `63774abf2e1e1239e34bd77ee0003b5dc213158e`)
-- **Task specification:** [tasks/005-identity-auth.md](tasks/005-identity-auth.md)
+- **Last completed checkpoint:** `5.6` Public API surface lock-down / closure gate ([freight-backend#19](https://github.com/isadulla7/freight-backend/pull/19), merged `865867c78470168acb6179fc378428dcbc89bbd0`)
+- **Task specification:** [tasks/005-identity-auth.md](tasks/005-identity-auth.md) — see "Accounts-independent slice: closure assessment"
 - **Implementation repository:** [isadulla7/freight-backend](https://github.com/isadulla7/freight-backend)
 
-Before implementation:
+Before any further implementation:
 
 1. Read `AGENTS.md`
 2. Read `PROJECT-STATUS.md`
 3. Read `HANDOFF.md`
-4. Read `tasks/005-identity-auth.md`
+4. Read `tasks/005-identity-auth.md` in full, especially the closure assessment section
 5. Re-read the `identity` section of [module-boundaries.md](docs/architecture/module-boundaries.md), [ADR-0005](docs/architecture/decisions/0005-authentication-and-sessions.md), and [ADR-0015](docs/architecture/decisions/0015-authorization-and-audit.md)
 6. Inspect the current `freight-backend` GitHub `main`
 7. Confirm open PR state
 
 Do not rely on previous chat history.
 
-Do not skip ahead into other business modules (accounts, fleet, freight, marketplace, shipment, communication).
+## What is done
 
-## Proposed next bounded subtask (5.5): remaining session-management public API
+`Authenticate`, `RefreshSession`, `RevokeSession`, `RevokeAllUserSessions`, `ListUserSessions` are implemented, tested (Testcontainers PostgreSQL/Redis), and the module's public surface is locked to exactly these types plus their result/DTO types. This is everything in `identity`'s accepted public API that does not depend on another module or an undecided security mechanism.
 
-Thin public wrappers over the already-built `SessionLifecycleService` (5.3), following the same shape as `Authenticate` (5.4) — same file, same visibility discipline (public use-case class, internal collaborators):
+## What is blocked, and why
 
-- `RefreshSession(rawRefreshToken)`: wraps `SessionLifecycleService.refresh`, translating its internal `RefreshResult` into a public result type.
-- `RevokeSession(sessionId)`, `RevokeAllUserSessions(authIdentityId)`, `ListUserSessions(authIdentityId)`: thin wrappers over the corresponding `SessionLifecycleService` methods; `ListUserSessions` should return a public-safe view (no raw token/hash data) rather than the internal `AuthSession` entity directly.
+1. **`VerifyOtpAndRegister`** needs `accounts.ProvisionUser`. `accounts` is still just `package-info.kt` — this is Phase 6 work, explicitly out of Phase 5 scope. Not ambiguous, just sequenced after Phase 6 starts.
+2. **`ResolveAuthenticatedPrincipal`** needs an access-token design (signing algorithm, claims, expiry, validation flow — e.g. stateless JWT vs. a server-side lookup). The accepted architecture only names `JWT_PRIVATE_KEY` in an illustrative env-var list, not a real specification. This is a "security model requires a new architecture decision" situation per the project's blocker policy — it needs an explicit decision (ideally a short ADR) before implementation, not a guess.
 
-Still deferred (do not implement yet):
+**Do not implement `accounts` persistence to unblock (1), and do not invent a JWT/token scheme to unblock (2), without the product owner's explicit direction.** Both are recorded here so the decision is visible without needing prior chat context.
 
-- `VerifyOtpAndRegister` (registration) — needs `accounts.ProvisionUser`, which does not exist (`accounts` is still just `package-info.kt`, Phase 6, out of Phase 5 scope)
-- `ResolveAuthenticatedPrincipal` (Spring Security integration) — re-evaluate scope/dependencies against module-boundaries.md when reached
-- Any HTTP endpoint — a separate, later subtask category
+## Once unblocked
 
-Confirm this scope against the then-current repo state before coding — do not assume it is still correct if the repository has changed since this was written.
+- If Phase 6 (`accounts`) starts first: implement `VerifyOtpAndRegister` once `accounts.ProvisionUser` exists.
+- If an access-token design is settled: implement `ResolveAuthenticatedPrincipal`, then wire real HTTP endpoints for the already-complete `Authenticate`/session-management API (endpoints are a separate, not-yet-started subtask category regardless of the above).

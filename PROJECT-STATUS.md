@@ -9,9 +9,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Current architecture version | `v1.0` |
 | Authoritative `main` | Resolve the current SHA from GitHub; repository state is authoritative |
 | Latest completed architecture gate | Architecture v1.0 Lock |
-| Current task | `[5] Identity/Auth - IN PROGRESS` |
-| Last completed backend checkpoint | `[5.4] Authenticate public application API - COMPLETE` |
-| Next task | Select and confirm the next bounded Phase 5 subtask — see [`tasks/005-identity-auth.md`](tasks/005-identity-auth.md) |
+| Current task | `[5] Identity/Auth - accounts-independent slice COMPLETE, blocked on decisions for the rest` |
+| Last completed backend checkpoint | `[5.6] Public API surface lock-down (closure gate) - COMPLETE` |
+| Next task | Blocked pending confirmation — see "Accounts-independent slice: closure assessment" in [`tasks/005-identity-auth.md`](tasks/005-identity-auth.md) |
 
 ## Roadmap
 
@@ -23,7 +23,7 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 2 | API Contract v1 | **COMPLETE** |
 | 3 | Backend Foundation | **COMPLETE** |
 | 4 | Local Infrastructure | **COMPLETE** |
-| 5 | Identity/Auth | **IN PROGRESS** |
+| 5 | Identity/Auth | **IN PROGRESS (blocked — see task file)** |
 | 6 | Accounts | **PENDING** |
 | 7 | Fleet | **PENDING** |
 | 8 | Freight | **PENDING** |
@@ -54,3 +54,7 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 5.2 | OTP challenge and rate-limit Redis primitives (OtpChallengeStore, OtpRateLimiter) | **COMPLETE** |
 | 5.3 | Session lifecycle domain service (SessionLifecycleService: issue/refresh/revoke/list) | **COMPLETE** |
 | 5.4 | Authenticate public application API | **COMPLETE** |
+| 5.5 | RefreshSession/RevokeSession/RevokeAllUserSessions/ListUserSessions public API | **COMPLETE** |
+| 5.6 | Public API surface lock-down (closure gate) | **COMPLETE** |
+| — | `VerifyOtpAndRegister` | **BLOCKED** on `accounts.ProvisionUser` (Phase 6) |
+| — | `ResolveAuthenticatedPrincipal` | **BLOCKED** on an access-token design decision (see task file) |
