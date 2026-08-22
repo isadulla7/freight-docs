@@ -22,7 +22,8 @@ This file tracks checkpoint status only. It does not restate accepted architectu
 | 3.2 | Security/config foundation (deny-by-default, stateless, CORS) | **COMPLETE** |
 | 3.3A | PostgreSQL/PostGIS/Flyway/JPA/jOOQ foundation | **COMPLETE** |
 | 3.3B | PostgreSQL/PostGIS integration validation | **COMPLETE** |
-| 3.4A | CI foundation (GitHub Actions build/test gate) | **CURRENT** |
+| 3.4A | CI foundation (GitHub Actions build/test gate) | **COMPLETE** |
+| 3.4B | Redis foundation (OTP/rate-limit/hot cache/session metadata store, per [ADR-0003](../docs/architecture/decisions/0003-persistence.md) and [ADR-0004](../docs/architecture/decisions/0004-build-and-local-runtime.md)) | **CURRENT** |
 
 ## Out of scope
 
