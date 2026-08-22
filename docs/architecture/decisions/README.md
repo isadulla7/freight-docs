@@ -28,5 +28,6 @@ ADR arxitektura qarorining konteksti, tanlovi va oqibatlarini o‘zgarmas tarix 
 | [0013](0013-shared-database-ownership.md) | Shared database schema ownership va cross-module reference | Qabul qilindi |
 | [0014](0014-geospatial-representation.md) | Geospatial point representation va SRID | Qabul qilindi |
 | [0015](0015-authorization-and-audit.md) | Capability-based scoped authorization va audit | Qabul qilindi |
+| [0016](0016-access-token-design.md) | JWT access token dizayni | Qabul qilindi |
 
 Yangi qaror uchun [ADR shabloni](0000-template.md) dan foydalaning.
