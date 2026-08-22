@@ -9,9 +9,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Current architecture version | `v1.0` |
 | Authoritative `main` | Resolve the current SHA from GitHub; repository state is authoritative |
 | Latest completed architecture gate | Architecture v1.0 Lock |
-| Current task | `[9] Marketplace` |
-| Last completed backend checkpoint | `[8] Freight module — MERGED` |
-| Next task | `[9] Marketplace — Offer lifecycle, concurrency-safe winner selection` |
+| Current task | `[10] Shipment` |
+| Last completed backend checkpoint | `[9] Marketplace module — MERGED` |
+| Next task | `[10] Shipment — Shipment lifecycle from accepted offer` |
 
 ## Roadmap
 
@@ -27,8 +27,8 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 6 | Accounts | **COMPLETE** |
 | 7 | Fleet | **COMPLETE** |
 | 8 | Freight | **COMPLETE** |
-| 9 | Marketplace | **NEXT** |
-| 10 | Shipment | **PENDING** |
+| 9 | Marketplace | **COMPLETE** |
+| 10 | Shipment | **NEXT** |
 | 11 | Communication | **PENDING** |
 | 12 | Mobile/Web | **PENDING** |
 
@@ -81,3 +81,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | --- | --- | --- |
 | 8.1 | Freight persistence foundation (Flyway V5 + 5 tables + PostGIS + JPA entities) | **COMPLETE** |
 | 8.2 | Load lifecycle services (CreateLoad, UpdateDraftLoad, PublishLoad, CancelLoad, ExpireLoad, MatchLoad, GetLoadSummary, SearchLoads, ValidateOfferEligibility) | **COMPLETE** |
+
+## Marketplace checkpoints
+
+| Checkpoint | Scope | Status |
+| --- | --- | --- |
+| 9.1 | Marketplace persistence + full CQRS API (V6 migration, Offer entity, CreateOffer, WithdrawOffer, RejectOffer, AcceptOffer, GetOfferSummary, ListOffersForLoad, concurrency-safe winner selection) | **COMPLETE** |
