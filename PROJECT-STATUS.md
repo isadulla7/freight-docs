@@ -9,9 +9,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Current architecture version | `v1.0` |
 | Authoritative `main` | Resolve the current SHA from GitHub; repository state is authoritative |
 | Latest completed architecture gate | Architecture v1.0 Lock |
-| Current task | `[5] Identity/Auth — all accounts-independent public API COMPLETE; branch pushed, PR pending` |
-| Last completed backend checkpoint | `[5.8] ResolveAuthenticatedPrincipal + JWT access-token infrastructure — PUSHED` |
-| Next task | Create PR for `feat/identity-access-token-infrastructure`, merge, then start Phase 6 (accounts) or identity HTTP endpoints |
+| Current task | `[6] Accounts` |
+| Last completed backend checkpoint | `[6.1] Accounts persistence foundation — MERGED` |
+| Next task | `[6.2] ProvisionUser` public application API |
 
 ## Roadmap
 
@@ -23,8 +23,8 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 2 | API Contract v1 | **COMPLETE** |
 | 3 | Backend Foundation | **COMPLETE** |
 | 4 | Local Infrastructure | **COMPLETE** |
-| 5 | Identity/Auth | **IN PROGRESS (accounts-independent API complete, PR pending merge)** |
-| 6 | Accounts | **PENDING** |
+| 5 | Identity/Auth | **COMPLETE** (accounts-independent slice; `VerifyOtpAndRegister` deferred to after 6.2) |
+| 6 | Accounts | **IN PROGRESS** |
 | 7 | Fleet | **PENDING** |
 | 8 | Freight | **PENDING** |
 | 9 | Marketplace | **PENDING** |
@@ -56,6 +56,13 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 5.4 | Authenticate public application API | **COMPLETE** |
 | 5.5 | RefreshSession/RevokeSession/RevokeAllUserSessions/ListUserSessions public API | **COMPLETE** |
 | 5.6 | Public API surface lock-down (closure gate) | **COMPLETE** |
-| 5.7 | JWT access-token infrastructure (EdDSA/Ed25519, ADR-0016) | **PUSHED** |
-| 5.8 | ResolveAuthenticatedPrincipal + AuthenticatedPrincipal | **PUSHED** |
-| — | `VerifyOtpAndRegister` | **BLOCKED** on `accounts.ProvisionUser` (Phase 6) |
+| 5.7 | JWT access-token infrastructure (EdDSA/Ed25519, ADR-0016) | **COMPLETE** |
+| 5.8 | ResolveAuthenticatedPrincipal + AuthenticatedPrincipal | **COMPLETE** |
+| — | `VerifyOtpAndRegister` | **BLOCKED** on `accounts.ProvisionUser` (checkpoint 6.2) |
+
+## Accounts checkpoints
+
+| Checkpoint | Scope | Status |
+| --- | --- | --- |
+| 6.1 | Accounts persistence foundation (Flyway V3 + 13 tables + JPA entities/repositories) | **COMPLETE** |
+| 6.2 | `ProvisionUser` public application API | **NEXT** |

@@ -1,38 +1,40 @@
 # Next task
 
-Backend Foundation (phase 3), Local Infrastructure (phase 4), and Identity/Auth (phase 5, accounts-independent slice) are all COMPLETE. The access-token design was decided and recorded as [ADR-0016](docs/architecture/decisions/0016-access-token-design.md). Checkpoints 5.7 and 5.8 are pushed but the PR has not yet been created (requires `gh auth login`).
+Phase 5 (Identity/Auth) accounts-independent slice and Phase 6 checkpoint 6.1 (accounts persistence foundation) are COMPLETE and merged.
 
-- **Current phase:** Identity/Auth
-- **Last completed checkpoint:** `5.8` ResolveAuthenticatedPrincipal + JWT access-token infrastructure (branch `feat/identity-access-token-infrastructure` pushed to origin)
-- **Task specification:** [tasks/005-identity-auth.md](tasks/005-identity-auth.md) — see "Phase 5 status"
+- **Current phase:** Accounts (phase 6)
+- **Last completed checkpoint:** `6.1` Accounts persistence foundation (Flyway V3 + JPA entities)
+- **Next checkpoint:** `6.2` `ProvisionUser` public application API
+- **Task specification:** [tasks/006-accounts.md](tasks/006-accounts.md)
 - **Implementation repository:** [isadulla7/freight-backend](https://github.com/isadulla7/freight-backend)
 
-Before any further implementation:
+Before any implementation:
 
 1. Read `AGENTS.md`
 2. Read `PROJECT-STATUS.md`
 3. Read `HANDOFF.md`
-4. Read `tasks/005-identity-auth.md` in full
+4. Read `tasks/006-accounts.md` in full
 5. Inspect the current `freight-backend` GitHub `main`
-6. Confirm open PR state
+6. Confirm no open PRs conflict
 
 Do not rely on previous chat history.
 
 ## What is done
 
-All `identity` public application API members that do not depend on `accounts` are implemented and tested:
-`Authenticate`, `RefreshSession`, `RevokeSession`, `RevokeAllUserSessions`, `ListUserSessions`, `ResolveAuthenticatedPrincipal`.
+**Identity (phase 5):** All accounts-independent public API members are merged: `Authenticate`, `RefreshSession`, `RevokeSession`, `RevokeAllUserSessions`, `ListUserSessions`, `ResolveAuthenticatedPrincipal`. JWT access-token infrastructure (EdDSA/Ed25519, 15m TTL, server-side session validation) per ADR-0016.
 
-Supporting infrastructure: Flyway schema, JPA entities/repositories, OTP challenge/rate-limit Redis state, session lifecycle with rotation and reuse detection, JWT access-token issuance and verification (EdDSA/Ed25519, 15-minute TTL, server-side session validation). All covered by Testcontainers integration tests plus a source-level public API surface lock-down test.
+**Accounts (phase 6, checkpoint 6.1):** Flyway V3 migration creates all 13 accounts-schema tables per database-erd.md. Matching JPA entities and Spring Data repositories. 10 Testcontainers integration tests. No application services or endpoints yet.
 
-## Immediate next action
+## Checkpoint 6.2: ProvisionUser
 
-1. **Create the PR** for branch `feat/identity-access-token-infrastructure` — requires `gh auth login` (the CLI is installed but not authenticated).
-2. **Merge** the PR once CI is green.
-3. **Choose the next work:** either start Phase 6 (`accounts`), or implement `identity` HTTP endpoints for the already-complete public API.
+Implement `ProvisionUser` as the first accounts public application API member:
+
+1. **Internal domain service** — create an `accounts.User` row (status ACTIVE, auto-generated UUID). Keep it minimal: no roles, no company membership, no consent — those are separate API members.
+2. **Public `ProvisionUser` function** — the accounts module's public API entry point, callable cross-module (from `identity`).
+3. **Wire `identity.VerifyOtpAndRegister`** — once `ProvisionUser` exists, implement the last remaining identity public API member. `VerifyOtpAndRegister` verifies the OTP, calls `accounts.ProvisionUser`, then issues a session.
+4. **Update `identity` module's `allowedDependencies`** in `package-info.kt` to include `accounts` (this is the first cross-module dependency).
+5. **Tests** — Testcontainers integration tests for `ProvisionUser` and `VerifyOtpAndRegister`. Update `IdentityPublicApiSurfaceTests` to include `VerifyOtpAndRegister`.
 
 ## What remains blocked
 
-1. **`VerifyOtpAndRegister`** needs `accounts.ProvisionUser`. `accounts` is still just `package-info.kt` — this is Phase 6 work, explicitly out of Phase 5 scope. Not ambiguous, just sequenced after Phase 6 starts.
-
-No HTTP endpoints exist yet anywhere in `identity` — a separate, later subtask category.
+Nothing is blocked — `ProvisionUser` unblocks `VerifyOtpAndRegister`, and both can ship as checkpoint 6.2.
