@@ -3,8 +3,8 @@
 Continue with:
 
 - **Current phase:** Backend Foundation
-- **Current checkpoint:** 3.4B — Redis foundation
-- **Previous checkpoint:** 3.4A CI foundation — COMPLETE
+- **Current checkpoint:** 3.4C — API error contract foundation
+- **Previous checkpoint:** 3.4B Redis foundation — COMPLETE
 - **Task specification:** [tasks/003-backend-foundation.md](tasks/003-backend-foundation.md)
 - **Implementation repository:** [isadulla7/freight-backend](https://github.com/isadulla7/freight-backend)
 
@@ -14,7 +14,7 @@ Before implementation:
 2. Read `PROJECT-STATUS.md`
 3. Read `HANDOFF.md`
 4. Read `tasks/003-backend-foundation.md`
-5. Re-read only the architecture/security/database documents relevant to 3.4B, including [ADR-0003](docs/architecture/decisions/0003-persistence.md) and [ADR-0004](docs/architecture/decisions/0004-build-and-local-runtime.md) for accepted Redis usage
+5. Re-read only the architecture/security/database documents relevant to 3.4C, including [docs/api/errors.md](docs/api/errors.md) for the accepted error envelope and [ADR-0007](docs/architecture/decisions/0007-openapi-contract.md) for contract ownership boundaries
 6. Inspect the current `freight-backend` GitHub `main`
 7. Confirm open PR state
 
@@ -24,8 +24,8 @@ Do not skip ahead into Identity/Auth or business modules until Backend Foundatio
 
 The current bounded subtask is:
 
-- **3.4B — Redis foundation**
+- **3.4C — API error contract foundation**
 
-Implementation has not started. Select and confirm the exact bounded scope of 3.4B before coding.
+Implementation has not started. Select and confirm the exact bounded scope of 3.4C before coding.
 
-Do not start 3.4C or later work until 3.4B is reviewed and merged.
+Do not start 3.4D or later work until 3.4C is reviewed and merged.

@@ -3,11 +3,11 @@
 | Field | Value |
 | --- | --- |
 | Repository | `isadulla7/freight-docs` |
-| Current branch | `docs/task-003-3.4b-redis-foundation` |
+| Current branch | `docs/task-003-3.4c-api-error-contract` |
 | Base branch | `main` |
 | Current phase | `[3] Backend Foundation - IN PROGRESS` |
-| Current checkpoint | `[3.4B] Redis foundation - CURRENT` |
-| Last completed checkpoint | `[3.4A] CI foundation` |
+| Current checkpoint | `[3.4C] API error contract foundation - CURRENT` |
+| Last completed checkpoint | `[3.4B] Redis foundation` |
 
 ## Work state
 
@@ -18,12 +18,13 @@
 - Backend Foundation 3.3A is COMPLETE.
 - Backend Foundation 3.3B is COMPLETE.
 - Backend Foundation 3.4A is COMPLETE (GitHub Actions build/test pipeline, `freight-backend` PR #7, merged).
-- Backend Foundation 3.4B (Redis foundation) is the current bounded task. Implementation has not started.
+- Backend Foundation 3.4B is COMPLETE (Redis client foundation, `freight-backend` PR #8, merged).
+- Backend Foundation 3.4C (API error contract foundation) is the current bounded task. Implementation has not started.
 - No Identity/Auth or business-domain implementation has started.
 
 ## Exact next action
 
-Select and confirm the exact bounded scope of Backend Foundation 3.4B (Redis foundation), then execute it in `freight-backend`.
+Select and confirm the exact bounded scope of Backend Foundation 3.4C (API error contract foundation), then execute it in `freight-backend`.
 
 Before coding:
 
