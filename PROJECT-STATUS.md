@@ -1,4 +1,4 @@
-﻿# Project status
+# Project status
 
 This file is a navigation summary. Accepted architecture remains in the [canonical context](architecture/architecture-context-v1.md) and [ADRs](docs/architecture/decisions/README.md).
 
@@ -6,12 +6,12 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 
 | Field | Value |
 | --- | --- |
-| Current architecture version | 1.0 |
-| Authoritative main | Resolve the current SHA from GitHub; repository state is authoritative |
+| Current architecture version | `v1.0` |
+| Authoritative `main` | Resolve the current SHA from GitHub; repository state is authoritative |
 | Latest completed architecture gate | Architecture v1.0 Lock |
-| Current task | [3.4] Backend Foundation - CURRENT |
-| Last completed backend checkpoint | [3.3B] PostgreSQL/PostGIS integration validation - COMPLETE |
-| Next task | [3.4] Backend Foundation continuation |
+| Current task | `[3.4A] CI foundation - CURRENT` |
+| Last completed backend checkpoint | `[3.3B] PostgreSQL/PostGIS integration validation - COMPLETE` |
+| Next task | Complete and review Backend Foundation 3.4A |
 
 ## Roadmap
 
@@ -34,11 +34,11 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 
 ## Backend Foundation checkpoints
 
-| Checkpoint | Status |
-| --- | --- |
-| 3.1A Minimal backend scaffold | **COMPLETE** |
-| 3.1B Spring Modulith boundaries/tests | **COMPLETE** |
-| 3.2 Security/config foundation | **COMPLETE** |
-| 3.3A PostgreSQL/PostGIS/Flyway/JPA/jOOQ foundation | **COMPLETE** |
-| 3.3B PostgreSQL/PostGIS integration validation | **COMPLETE** |
-| 3.4 Backend Foundation continuation | **CURRENT** |
+| Checkpoint | Scope | Status |
+| --- | --- | --- |
+| 3.1A | Kotlin/Spring Boot project scaffold | **COMPLETE** |
+| 3.1B | Spring Modulith boundaries + architecture tests | **COMPLETE** |
+| 3.2 | Security and configuration foundation | **COMPLETE** |
+| 3.3A | PostgreSQL/PostGIS/Flyway/JPA/jOOQ foundation | **COMPLETE** |
+| 3.3B | PostgreSQL/PostGIS integration validation with Testcontainers | **COMPLETE** |
+| 3.4A | CI foundation | **CURRENT** |
