@@ -51,3 +51,10 @@ This file is only the next-phase task specification. It does not select or execu
 
 - Implementation happens in `freight-backend`, not in `freight-docs`.
 - This file is updated as each subtask starts and completes, the same way `tasks/003-backend-foundation.md` and `tasks/004-local-infrastructure.md` tracked their checkpoints.
+
+## Subtask checkpoints
+
+| Checkpoint | Scope | Status | PR |
+| --- | --- | --- | --- |
+| 5.1 | Identity persistence foundation — Flyway `V2` migration for `identity.auth_identities`/`auth_devices`/`auth_sessions`, matching JPA entities/repositories, no cross-schema FKs, refresh tokens stored as hashes only, no application services/endpoints yet | **COMPLETE** | [freight-backend#14](https://github.com/isadulla7/freight-backend/pull/14) (merged `aad4bd16d8a5c5a5608ceb73d8299595ccf7bd56`) |
+| 5.2 | Next: select the smallest bounded next subtask (e.g. OTP challenge/rate-limit primitives in Redis, or the `accounts.ProvisionUser` integration seam) from current repo state | **NEXT** | — |
