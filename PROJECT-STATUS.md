@@ -9,9 +9,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Current architecture version | `v1.0` |
 | Authoritative `main` | Resolve the current SHA from GitHub; repository state is authoritative |
 | Latest completed architecture gate | Architecture v1.0 Lock |
-| Current task | `[5] Identity/Auth - NEXT` |
-| Last completed backend checkpoint | `[4] Local Infrastructure - COMPLETE` |
-| Next task | Select and confirm the first bounded Phase 5 subtask — see [`tasks/005-identity-auth.md`](tasks/005-identity-auth.md) |
+| Current task | `[5] Identity/Auth - IN PROGRESS` |
+| Last completed backend checkpoint | `[5.1] Identity persistence foundation - COMPLETE` |
+| Next task | Select and confirm the next bounded Phase 5 subtask — see [`tasks/005-identity-auth.md`](tasks/005-identity-auth.md) |
 
 ## Roadmap
 
@@ -23,7 +23,7 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 2 | API Contract v1 | **COMPLETE** |
 | 3 | Backend Foundation | **COMPLETE** |
 | 4 | Local Infrastructure | **COMPLETE** |
-| 5 | Identity/Auth | **NEXT** |
+| 5 | Identity/Auth | **IN PROGRESS** |
 | 6 | Accounts | **PENDING** |
 | 7 | Fleet | **PENDING** |
 | 8 | Freight | **PENDING** |
@@ -45,3 +45,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 3.4B | Redis foundation | **COMPLETE** |
 | 3.4C | API error contract foundation | **COMPLETE** |
 | 3.4D | Backend Foundation closure gate | **COMPLETE** |
+
+## Identity/Auth checkpoints
+
+| Checkpoint | Scope | Status |
+| --- | --- | --- |
+| 5.1 | Identity persistence foundation (Flyway + JPA entities for auth_identities/auth_devices/auth_sessions) | **COMPLETE** |

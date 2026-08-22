@@ -1,8 +1,9 @@
 # Next task
 
-Backend Foundation (phase 3) and Local Infrastructure (phase 4) are both COMPLETE. Continue with:
+Backend Foundation (phase 3) and Local Infrastructure (phase 4) are both COMPLETE. Identity/Auth (phase 5) is IN PROGRESS.
 
 - **Current phase:** Identity/Auth
+- **Last completed checkpoint:** `5.1` Identity persistence foundation ([freight-backend#14](https://github.com/isadulla7/freight-backend/pull/14), merged `aad4bd16d8a5c5a5608ceb73d8299595ccf7bd56`)
 - **Task specification:** [tasks/005-identity-auth.md](tasks/005-identity-auth.md)
 - **Implementation repository:** [isadulla7/freight-backend](https://github.com/isadulla7/freight-backend)
 
@@ -20,4 +21,4 @@ Do not rely on previous chat history.
 
 Do not skip ahead into other business modules (accounts, fleet, freight, marketplace, shipment, communication).
 
-Identity/Auth implementation has not started. The exact bounded first subtask must be selected and confirmed before coding, the same way each Backend Foundation and Local Infrastructure subtask was.
+The next bounded Phase 5 subtask must be selected and confirmed from current repository state before coding, the same way checkpoint 5.1 was. Candidates include (not a mandatory order): OTP challenge/rate-limit state in Redis, the `accounts.ProvisionUser` integration seam, or the `VerifyOtpAndRegister`/`Authenticate` application service skeleton — whichever is smallest given what 5.1 already shipped.
