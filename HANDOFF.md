@@ -3,11 +3,10 @@
 | Field | Value |
 | --- | --- |
 | Repository | `isadulla7/freight-docs` |
-| Current branch | `docs/phase5-checkpoint-5.3` |
+| Current branch | `docs/phase5-checkpoint-5.4` |
 | Base branch | `main` |
 | Current phase | `[5] Identity/Auth - IN PROGRESS` |
-| Last completed checkpoint | `[5.3] Session lifecycle domain service - COMPLETE` |
-| In flight | `[5.4] Authenticate public application API` — freight-backend#17 (open) |
+| Last completed checkpoint | `[5.4] Authenticate public application API - COMPLETE` |
 
 ## Work state
 
@@ -16,7 +15,7 @@
   - 5.1: Flyway `V2` migration + JPA entities/repositories for `identity.auth_identities`/`auth_devices`/`auth_sessions`.
   - 5.2: `OtpChallengeStore` (salted-hash, single-use, TTL-bound OTP challenge) + `OtpRateLimiter` (fixed-window counter), under `identity:otp:*` Redis keys.
   - 5.3: `SessionLifecycleService` — issue/refresh-with-rotation-and-reuse-detection/revoke/revokeAll/list, on top of 5.1's persistence.
-  - 5.4 (in flight, PR open, not yet merged as of this handoff): `Authenticate`, the module's first public application API member — composes 5.2 + 5.3 for an already-registered identity, rate-limited, non-disclosure on failure.
+  - 5.4: `Authenticate`, the module's first public application API member — composes 5.2 + 5.3 for an already-registered identity, rate-limited, non-disclosure on failure.
 - `RefreshSession`, `RevokeSession`, `RevokeAllUserSessions`, `ListUserSessions`, `VerifyOtpAndRegister`, `ResolveAuthenticatedPrincipal` are still unimplemented. No HTTP endpoints exist yet in `identity`.
 - `accounts` module is still just `package-info.kt` — `VerifyOtpAndRegister` cannot be completed until `accounts.ProvisionUser` exists (Phase 6, out of Phase 5 scope).
 - No business-domain implementation (fleet, freight, marketplace, shipment, communication) has started.
@@ -29,12 +28,13 @@
 | `freight-backend` main SHA (before Phase 5) | `2a342fe3e8c1e3985e785b714a4001134e7164c4` |
 | `freight-backend` main SHA (after 5.1) | `aad4bd16d8a5c5a5608ceb73d8299595ccf7bd56` |
 | `freight-backend` main SHA (after 5.2) | `832097ef6e94a7eb198909ddb5af8b120ac6fe56` |
-| `freight-backend` main SHA (after 5.3, current) | `4d72de6711b8c5ae274f62ac7c6c7a5cc60a03e8` |
-| Open PRs (freight-backend) | [#17](https://github.com/isadulla7/freight-backend/pull/17) (5.4, `Authenticate`) |
+| `freight-backend` main SHA (after 5.3) | `4d72de6711b8c5ae274f62ac7c6c7a5cc60a03e8` |
+| `freight-backend` main SHA (after 5.4, current) | `63774abf2e1e1239e34bd77ee0003b5dc213158e` |
+| Open PRs (freight-backend) | none |
 | Open PRs (freight-docs) | none until this docs sync PR |
-| freight-backend#14, #15, #16 | All merged (squash), CI green, no unresolved review comments |
+| freight-backend#14, #15, #16, #17 | All merged (squash), CI green, no unresolved review comments |
 
-## Validation completed for 5.1–5.3 (5.4 in flight, same pattern)
+## Validation completed for 5.1–5.4
 
 - `./gradlew compileKotlin compileTestKotlin` — clean at every checkpoint
 - `./gradlew test` locally (no Docker in sandbox): all non-Testcontainers tests pass every time, no regressions
@@ -44,9 +44,7 @@
 
 ## Exact next action
 
-1. Check whether `freight-backend#17` has merged. If CI is green and PR policy is fully satisfied, merge it, then sync freight-docs for checkpoint 5.4.
-2. Execute checkpoint 5.5 as scoped in [`NEXT-TASK.md`](NEXT-TASK.md): public `RefreshSession`/`RevokeSession`/`RevokeAllUserSessions`/`ListUserSessions` wrappers over `SessionLifecycleService`.
-3. Re-verify `freight-backend` main and open-PR state before starting any new subtask.
+Execute checkpoint 5.5 as scoped in [`NEXT-TASK.md`](NEXT-TASK.md): public `RefreshSession`/`RevokeSession`/`RevokeAllUserSessions`/`ListUserSessions` wrappers over `SessionLifecycleService`. Start from `freight-backend` main `63774abf2e1e1239e34bd77ee0003b5dc213158e`; re-verify main and open-PR state before coding, and re-confirm the scope is still correct against the then-current repository.
 
 Before doing so:
 
