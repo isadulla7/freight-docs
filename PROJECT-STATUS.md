@@ -10,7 +10,7 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Authoritative `main` | Resolve the current SHA from GitHub; repository state is authoritative |
 | Latest completed architecture gate | Architecture v1.0 Lock |
 | Current task | `[5] Identity/Auth - IN PROGRESS` |
-| Last completed backend checkpoint | `[5.1] Identity persistence foundation - COMPLETE` |
+| Last completed backend checkpoint | `[5.2] OTP challenge and rate-limit Redis primitives - COMPLETE` |
 | Next task | Select and confirm the next bounded Phase 5 subtask — see [`tasks/005-identity-auth.md`](tasks/005-identity-auth.md) |
 
 ## Roadmap
@@ -51,3 +51,4 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Checkpoint | Scope | Status |
 | --- | --- | --- |
 | 5.1 | Identity persistence foundation (Flyway + JPA entities for auth_identities/auth_devices/auth_sessions) | **COMPLETE** |
+| 5.2 | OTP challenge and rate-limit Redis primitives (OtpChallengeStore, OtpRateLimiter) | **COMPLETE** |
