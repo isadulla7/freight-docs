@@ -9,9 +9,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Current architecture version | `v1.0` |
 | Authoritative `main` | Resolve the current SHA from GitHub; repository state is authoritative |
 | Latest completed architecture gate | Architecture v1.0 Lock |
-| Current task | `[4] Local Infrastructure - NEXT` |
-| Last completed backend checkpoint | `[3.4D] Backend Foundation closure gate - COMPLETE` |
-| Next task | Select and confirm the first bounded Phase 4 subtask — see [`tasks/004-local-infrastructure.md`](tasks/004-local-infrastructure.md) |
+| Current task | `[5] Identity/Auth - NEXT` |
+| Last completed backend checkpoint | `[4] Local Infrastructure - COMPLETE` |
+| Next task | Select and confirm the first bounded Phase 5 subtask — see [`tasks/005-identity-auth.md`](tasks/005-identity-auth.md) |
 
 ## Roadmap
 
@@ -22,8 +22,8 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 1.5 | Agent Handoff System | **COMPLETE** |
 | 2 | API Contract v1 | **COMPLETE** |
 | 3 | Backend Foundation | **COMPLETE** |
-| 4 | Local Infrastructure | **NEXT** |
-| 5 | Identity/Auth | **PENDING** |
+| 4 | Local Infrastructure | **COMPLETE** |
+| 5 | Identity/Auth | **NEXT** |
 | 6 | Accounts | **PENDING** |
 | 7 | Fleet | **PENDING** |
 | 8 | Freight | **PENDING** |
