@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | **IN PROGRESS** |
+| Status | **COMPLETE** |
 | Phase | `[3] Backend Foundation` |
 | Prior gate | API Contract v1 reviewed and merged |
 | Architecture baseline | [`architecture-context-v1.md`](../architecture/architecture-context-v1.md), version `v1.0` |
@@ -25,7 +25,20 @@ This file tracks checkpoint status only. It does not restate accepted architectu
 | 3.4A | CI foundation (GitHub Actions build/test gate) | **COMPLETE** |
 | 3.4B | Redis foundation (OTP/rate-limit/hot cache/session metadata store, per [ADR-0003](../docs/architecture/decisions/0003-persistence.md) and [ADR-0004](../docs/architecture/decisions/0004-build-and-local-runtime.md)) | **COMPLETE** |
 | 3.4C | API error contract foundation (stable machine-readable error envelope, per [docs/api/errors.md](../docs/api/errors.md) and [ADR-0007](../docs/architecture/decisions/0007-openapi-contract.md)) | **COMPLETE** |
-| 3.4D | Backend Foundation closure gate (review-only: confirm 3.1A-3.4C remain consistent before phase 3 is marked COMPLETE) | **CURRENT** |
+| 3.4D | Backend Foundation closure gate (review-only: confirm 3.1A-3.4C remain consistent before phase 3 is marked COMPLETE) | **COMPLETE** |
+
+## Closure evidence (3.4D)
+
+Verified against `freight-backend` main `5c169066640df82dff027df36828c02fa598a3ab`:
+
+- `./gradlew clean test` — BUILD SUCCESSFUL; `./gradlew build` — BUILD SUCCESSFUL
+- 37 tests / 0 skipped / 0 failures (architecture, security, PostgreSQL/PostGIS Testcontainers, Redis, API error contract all green)
+- `git diff --check` — clean
+- CI success, head SHA matches main
+- No open `freight-backend` pull requests affecting phase 3
+- No secrets found
+
+Phase 3 Backend Foundation is COMPLETE. Phase 4 (Local Infrastructure) is tracked in [tasks/004-local-infrastructure.md](004-local-infrastructure.md).
 
 ## Out of scope
 
