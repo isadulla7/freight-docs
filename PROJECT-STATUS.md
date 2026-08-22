@@ -9,9 +9,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Current architecture version | `v1.0` |
 | Authoritative `main` | Resolve the current SHA from GitHub; repository state is authoritative |
 | Latest completed architecture gate | Architecture v1.0 Lock |
-| Current task | `[6] Accounts` |
-| Last completed backend checkpoint | `[6.1] Accounts persistence foundation — MERGED` |
-| Next task | `[6.2] ProvisionUser` public application API |
+| Current task | `[9] Marketplace` |
+| Last completed backend checkpoint | `[8] Freight module — MERGED` |
+| Next task | `[9] Marketplace — Offer lifecycle, concurrency-safe winner selection` |
 
 ## Roadmap
 
@@ -23,11 +23,11 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 2 | API Contract v1 | **COMPLETE** |
 | 3 | Backend Foundation | **COMPLETE** |
 | 4 | Local Infrastructure | **COMPLETE** |
-| 5 | Identity/Auth | **COMPLETE** (accounts-independent slice; `VerifyOtpAndRegister` deferred to after 6.2) |
-| 6 | Accounts | **IN PROGRESS** |
-| 7 | Fleet | **PENDING** |
-| 8 | Freight | **PENDING** |
-| 9 | Marketplace | **PENDING** |
+| 5 | Identity/Auth | **COMPLETE** |
+| 6 | Accounts | **COMPLETE** |
+| 7 | Fleet | **COMPLETE** |
+| 8 | Freight | **COMPLETE** |
+| 9 | Marketplace | **NEXT** |
 | 10 | Shipment | **PENDING** |
 | 11 | Communication | **PENDING** |
 | 12 | Mobile/Web | **PENDING** |
@@ -58,11 +58,26 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 5.6 | Public API surface lock-down (closure gate) | **COMPLETE** |
 | 5.7 | JWT access-token infrastructure (EdDSA/Ed25519, ADR-0016) | **COMPLETE** |
 | 5.8 | ResolveAuthenticatedPrincipal + AuthenticatedPrincipal | **COMPLETE** |
-| — | `VerifyOtpAndRegister` | **BLOCKED** on `accounts.ProvisionUser` (checkpoint 6.2) |
+| 5.9 | VerifyOtpAndRegister (wired after accounts.ProvisionUser) | **COMPLETE** |
 
 ## Accounts checkpoints
 
 | Checkpoint | Scope | Status |
 | --- | --- | --- |
 | 6.1 | Accounts persistence foundation (Flyway V3 + 13 tables + JPA entities/repositories) | **COMPLETE** |
-| 6.2 | `ProvisionUser` public application API | **NEXT** |
+| 6.2 | ProvisionUser + VerifyOtpAndRegister cross-module wiring | **COMPLETE** |
+| 6.3 | Remaining accounts services (GetUserSummary, RecordConsent, CreateOrUpdateDriverProfile, CreateCompany, AddCompanyMember, RemoveCompanyMember, AssignUserRole, AssignCompanyMemberRole, Authorize, GetDriverEligibility, AppendSecurityAudit) | **COMPLETE** |
+
+## Fleet checkpoints
+
+| Checkpoint | Scope | Status |
+| --- | --- | --- |
+| 7.1 | Fleet persistence foundation (Flyway V4 + 8 tables + PostGIS + JPA entities) | **COMPLETE** |
+| 7.2 | Fleet services (CreateVehicle, PublishAvailableVehicle, SearchNearbyVehicles, ValidateVehicleEligibility) | **COMPLETE** |
+
+## Freight checkpoints
+
+| Checkpoint | Scope | Status |
+| --- | --- | --- |
+| 8.1 | Freight persistence foundation (Flyway V5 + 5 tables + PostGIS + JPA entities) | **COMPLETE** |
+| 8.2 | Load lifecycle services (CreateLoad, UpdateDraftLoad, PublishLoad, CancelLoad, ExpireLoad, MatchLoad, GetLoadSummary, SearchLoads, ValidateOfferEligibility) | **COMPLETE** |

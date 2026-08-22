@@ -1,11 +1,12 @@
 # Next task
 
-Phase 5 (Identity/Auth) accounts-independent slice and Phase 6 checkpoint 6.1 (accounts persistence foundation) are COMPLETE and merged.
+Phases 5–8 (Identity, Accounts, Fleet, Freight) are COMPLETE and merged.
 
-- **Current phase:** Accounts (phase 6)
-- **Last completed checkpoint:** `6.1` Accounts persistence foundation (Flyway V3 + JPA entities)
-- **Next checkpoint:** `6.2` `ProvisionUser` public application API
-- **Task specification:** [tasks/006-accounts.md](tasks/006-accounts.md)
+- **Current phase:** Marketplace (phase 9)
+- **Last completed phase:** Freight (phase 8) — `cffb69f`
+- **Next task:** Marketplace module — Offer lifecycle with concurrency-safe winner selection
+- **Architecture spec:** [docs/architecture/module-boundaries.md](docs/architecture/module-boundaries.md)
+- **Database spec:** [docs/architecture/database-erd.md](docs/architecture/database-erd.md)
 - **Implementation repository:** [isadulla7/freight-backend](https://github.com/isadulla7/freight-backend)
 
 Before any implementation:
@@ -13,28 +14,59 @@ Before any implementation:
 1. Read `AGENTS.md`
 2. Read `PROJECT-STATUS.md`
 3. Read `HANDOFF.md`
-4. Read `tasks/006-accounts.md` in full
-5. Inspect the current `freight-backend` GitHub `main`
-6. Confirm no open PRs conflict
+4. Read `docs/architecture/module-boundaries.md` (marketplace section)
+5. Read `docs/architecture/database-erd.md` (marketplace tables)
+6. Inspect the current `freight-backend` GitHub `main`
+7. Confirm no open PRs conflict
 
 Do not rely on previous chat history.
 
 ## What is done
 
-**Identity (phase 5):** All accounts-independent public API members are merged: `Authenticate`, `RefreshSession`, `RevokeSession`, `RevokeAllUserSessions`, `ListUserSessions`, `ResolveAuthenticatedPrincipal`. JWT access-token infrastructure (EdDSA/Ed25519, 15m TTL, server-side session validation) per ADR-0016.
+**Identity (phase 5):** All public API members merged including `VerifyOtpAndRegister`.
 
-**Accounts (phase 6, checkpoint 6.1):** Flyway V3 migration creates all 13 accounts-schema tables per database-erd.md. Matching JPA entities and Spring Data repositories. 10 Testcontainers integration tests. No application services or endpoints yet.
+**Accounts (phase 6):** All 12 services implemented and merged. Full authorization model (roles, permissions, company member roles).
 
-## Checkpoint 6.2: ProvisionUser
+**Fleet (phase 7):** V4 migration (8 tables), PostGIS geospatial search, vehicle lifecycle. Services: CreateVehicle, PublishAvailableVehicle, SearchNearbyVehicles, ValidateVehicleEligibility.
 
-Implement `ProvisionUser` as the first accounts public application API member:
+**Freight (phase 8):** V5 migration (5 tables), load lifecycle with optimistic locking. Services: CreateLoad, UpdateDraftLoad, PublishLoad, CancelLoad, ExpireLoad, MatchLoad (concurrency-safe), GetLoadSummary, SearchLoads, ValidateOfferEligibility.
 
-1. **Internal domain service** — create an `accounts.User` row (status ACTIVE, auto-generated UUID). Keep it minimal: no roles, no company membership, no consent — those are separate API members.
-2. **Public `ProvisionUser` function** — the accounts module's public API entry point, callable cross-module (from `identity`).
-3. **Wire `identity.VerifyOtpAndRegister`** — once `ProvisionUser` exists, implement the last remaining identity public API member. `VerifyOtpAndRegister` verifies the OTP, calls `accounts.ProvisionUser`, then issues a session.
-4. **Update `identity` module's `allowedDependencies`** in `package-info.kt` to include `accounts` (this is the first cross-module dependency).
-5. **Tests** — Testcontainers integration tests for `ProvisionUser` and `VerifyOtpAndRegister`. Update `IdentityPublicApiSurfaceTests` to include `VerifyOtpAndRegister`.
+## Phase 9: Marketplace
 
-## What remains blocked
+Implement the marketplace module — the offer/bidding layer between drivers/carriers and shippers:
 
-Nothing is blocked — `ProvisionUser` unblocks `VerifyOtpAndRegister`, and both can ship as checkpoint 6.2.
+### Database (V6 migration)
+
+Create `marketplace` schema tables per `database-erd.md`:
+- `offers` — with @Version for optimistic locking, status enum (PENDING/ACCEPTED/REJECTED/WITHDRAWN/EXPIRED/COUNTERED)
+- `offer_counter_offers` — counter-offer chain
+
+### Module dependencies
+
+`marketplace` depends on: `accounts`, `fleet`, `freight` (per `module-boundaries.md`).
+
+### Public API services
+
+1. **CreateOffer** — validate load eligibility (`freight.ValidateOfferEligibility`), validate vehicle eligibility (`fleet.ValidateVehicleEligibility`), create PENDING offer
+2. **WithdrawOffer** — PENDING → WITHDRAWN
+3. **AcceptOffer** — PENDING → ACCEPTED, then call `freight.MatchLoad` (concurrency-safe: if MatchLoad returns VersionConflict, reject this acceptance)
+4. **RejectOffer** — PENDING → REJECTED
+5. **CounterOffer** — create counter-offer record, mark offer as COUNTERED
+6. **GetOfferSummary** — read model
+7. **ListOffersForLoad** — query by loadId
+
+### Testing
+
+- Integration tests (Testcontainers) for all services
+- Public API surface test
+- Update PersistenceFoundationTests (entity count) and PostgreSqlIntegrationTests (Flyway version "6", marketplace table assertions)
+
+### Key design decisions
+
+- **Concurrency-safe winner selection**: AcceptOffer calls `freight.MatchLoad` with the load's current version. If another offer was accepted first (VersionConflict), AcceptOffer must fail gracefully.
+- **XOR owner on offer**: either `offerer_user_id` or `offerer_company_id`, not both.
+- **Cross-module calls are by UUID** (no FK across schemas).
+
+## Blockers
+
+None. `freight.ValidateOfferEligibility` and `freight.MatchLoad` are the marketplace's prerequisites and are already merged.
