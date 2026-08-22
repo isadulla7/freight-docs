@@ -24,7 +24,8 @@ This file tracks checkpoint status only. It does not restate accepted architectu
 | 3.3B | PostgreSQL/PostGIS integration validation | **COMPLETE** |
 | 3.4A | CI foundation (GitHub Actions build/test gate) | **COMPLETE** |
 | 3.4B | Redis foundation (OTP/rate-limit/hot cache/session metadata store, per [ADR-0003](../docs/architecture/decisions/0003-persistence.md) and [ADR-0004](../docs/architecture/decisions/0004-build-and-local-runtime.md)) | **COMPLETE** |
-| 3.4C | API error contract foundation (stable machine-readable error envelope, per [docs/api/errors.md](../docs/api/errors.md) and [ADR-0007](../docs/architecture/decisions/0007-openapi-contract.md)) | **CURRENT** |
+| 3.4C | API error contract foundation (stable machine-readable error envelope, per [docs/api/errors.md](../docs/api/errors.md) and [ADR-0007](../docs/architecture/decisions/0007-openapi-contract.md)) | **COMPLETE** |
+| 3.4D | Backend Foundation closure gate (review-only: confirm 3.1A-3.4C remain consistent before phase 3 is marked COMPLETE) | **CURRENT** |
 
 ## Out of scope
 
