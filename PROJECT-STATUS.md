@@ -9,9 +9,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Current architecture version | `v1.0` |
 | Authoritative `main` | Resolve the current SHA from GitHub; repository state is authoritative |
 | Latest completed architecture gate | Architecture v1.0 Lock |
-| Current task | `[3.4A] CI foundation - CURRENT` |
-| Last completed backend checkpoint | `[3.3B] PostgreSQL/PostGIS integration validation - COMPLETE` |
-| Next task | Complete and review Backend Foundation 3.4A |
+| Current task | `[3.4B] Redis foundation - CURRENT` |
+| Last completed backend checkpoint | `[3.4A] CI foundation - COMPLETE` |
+| Next task | Complete and review Backend Foundation 3.4B |
 
 ## Roadmap
 
@@ -41,4 +41,5 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 3.2 | Security and configuration foundation | **COMPLETE** |
 | 3.3A | PostgreSQL/PostGIS/Flyway/JPA/jOOQ foundation | **COMPLETE** |
 | 3.3B | PostgreSQL/PostGIS integration validation with Testcontainers | **COMPLETE** |
-| 3.4A | CI foundation | **CURRENT** |
+| 3.4A | CI foundation | **COMPLETE** |
+| 3.4B | Redis foundation | **CURRENT** |
