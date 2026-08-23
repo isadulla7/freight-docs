@@ -9,9 +9,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Current architecture version | `v1.0` |
 | Authoritative `main` | Resolve the current SHA from GitHub; repository state is authoritative |
 | Latest completed architecture gate | Architecture v1.0 Lock |
-| Current task | `[11] Communication` |
-| Last completed backend checkpoint | `[10] Shipment module — MERGED` |
-| Next task | `[11] Communication — Conversations, messages, notifications` |
+| Current task | `[12] Mobile/Web` (EXCLUDED per user instruction) |
+| Last completed backend checkpoint | `[11] Communication module — MERGED` |
+| Next task | Backend phases 5–11 COMPLETE. Phase 12 excluded. |
 
 ## Roadmap
 
@@ -29,7 +29,7 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 8 | Freight | **COMPLETE** |
 | 9 | Marketplace | **COMPLETE** |
 | 10 | Shipment | **COMPLETE** |
-| 11 | Communication | **NEXT** |
+| 11 | Communication | **COMPLETE** |
 | 12 | Mobile/Web | **PENDING** |
 
 ## Backend Foundation checkpoints
@@ -93,3 +93,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Checkpoint | Scope | Status |
 | --- | --- | --- |
 | 10.1 | Shipment persistence + full CQRS API (V7 migration, Shipment/ShipmentStatusHistory entities, CreateShipment, GetShipment, ListUserShipments, UpdateShipmentStatus with state machine, GetShipmentStatusHistory) | **COMPLETE** |
+
+## Communication checkpoints
+
+| Checkpoint | Scope | Status |
+| --- | --- | --- |
+| 11.1 | Communication persistence + full CQRS API (V8 migration, 7 tables, 7 entities, GetOrCreateShipmentConversation, SendMessage, ListMessages, MarkConversationRead, ListNotifications, MarkNotificationRead, UpdateCommunicationPreferences, RegisterPushEndpoint) | **COMPLETE** |

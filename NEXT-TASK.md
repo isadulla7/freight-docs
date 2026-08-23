@@ -1,25 +1,13 @@
 # Next task
 
-Phases 5–10 (Identity, Accounts, Fleet, Freight, Marketplace, Shipment) are COMPLETE and merged.
+Phases 5–11 (Identity, Accounts, Fleet, Freight, Marketplace, Shipment, Communication) are COMPLETE and merged.
 
-- **Current phase:** Communication (phase 11)
-- **Last completed phase:** Shipment (phase 10) — `bb9c2d4`
-- **Next task:** Communication module — Conversations, messages, notifications
+- **Current phase:** All backend phases COMPLETE
+- **Last completed phase:** Communication (phase 11) — `9bd4e3b`
+- **Next task:** Phase 12 (Mobile/Web) is EXCLUDED per user instruction
 - **Architecture spec:** [docs/architecture/module-boundaries.md](docs/architecture/module-boundaries.md)
 - **Database spec:** [docs/architecture/database-erd.md](docs/architecture/database-erd.md)
 - **Implementation repository:** [isadulla7/freight-backend](https://github.com/isadulla7/freight-backend)
-
-Before any implementation:
-
-1. Read `AGENTS.md`
-2. Read `PROJECT-STATUS.md`
-3. Read `HANDOFF.md`
-4. Read `docs/architecture/module-boundaries.md` (communication section)
-5. Read `docs/architecture/database-erd.md` (communication tables)
-6. Inspect the current `freight-backend` GitHub `main`
-7. Confirm no open PRs conflict
-
-Do not rely on previous chat history.
 
 ## What is done
 
@@ -35,42 +23,18 @@ Do not rely on previous chat history.
 
 **Shipment (phase 10):** V7 migration (2 tables — shipments, shipment_status_history), CreateShipment (idempotent by offer_id), GetShipment, ListUserShipments, UpdateShipmentStatus (state machine: CREATED→IN_TRANSIT→DELIVERED→COMPLETED, cancellable), GetShipmentStatusHistory.
 
-## Phase 11: Communication
+**Communication (phase 11):** V8 migration (7 tables — conversations, conversation_participants, messages, notifications, communication_preferences, push_endpoints, notification_deliveries), GetOrCreateShipmentConversation (idempotent), SendMessage (participant validation, auto-sequence), ListMessages (cursor-based), MarkConversationRead, ListNotifications, MarkNotificationRead, UpdateCommunicationPreferences (upsert), RegisterPushEndpoint (idempotent).
 
-Implement the communication module — conversations, messaging, notifications:
+## Summary
 
-### Database (V8 migration)
-
-Create `communication` schema tables per `database-erd.md`:
-- `conversations` — shipment-scoped, type/status
-- `conversation_participants` — composite PK, role, read tracking
-- `messages` — immutable, sender, body, sequence
-- `notifications` — recipient, type, source, read state
-- `communication_preferences` — user channel/type preferences
-- `push_endpoints` — device push tokens
-- `notification_deliveries` — delivery attempts, idempotency
-
-### Module dependencies
-
-`communication` depends on: `accounts`, `fleet`, `freight`, `identity`, `marketplace`, `shipment` (per `module-boundaries.md`).
-
-### Public API services
-
-1. **GetOrCreateShipmentConversation** — find or create conversation for a shipment
-2. **SendMessage** — add message to conversation
-3. **ListMessages** — paginated message list
-4. **MarkConversationRead** — update read position
-5. **ListNotifications** — user notifications
-6. **MarkNotificationRead** — mark notification as read
-7. **UpdateCommunicationPreferences** — user preference management
-8. **RegisterPushEndpoint** — device push token registration
-
-### Testing
-
-- Integration tests (Testcontainers) for all services
-- Public API surface test
-- Update PersistenceFoundationTests and PostgreSqlIntegrationTests
+All backend business modules are implemented:
+- 8 Flyway migrations (V1–V8)
+- 39 JPA entities across 7 module schemas
+- Full CQRS public API surface per module-boundaries.md
+- Comprehensive integration tests with Testcontainers (PostGIS + Redis)
+- Public API surface tests enforcing module encapsulation
+- Spring Modulith module boundaries enforced
 
 ## Blockers
 
-None.
+None. Backend implementation is complete through Phase 11.

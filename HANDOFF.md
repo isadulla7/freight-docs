@@ -6,20 +6,20 @@
 | freight-docs branch | `main` |
 | freight-backend branch | `main` (clean) |
 | Base branch | `main` (both repos) |
-| Current phase | `[11] Communication` |
-| Last completed phase | `[10] Shipment` |
-| Next phase | `[11] Communication — Conversations, messages, notifications` |
+| Current phase | All backend phases (5–11) COMPLETE |
+| Last completed phase | `[11] Communication` |
+| Next phase | `[12] Mobile/Web` — EXCLUDED per user instruction |
 
 ## Work state
 
-- Phases 1–10 are COMPLETE and merged to `main`.
-- Phase 10 (Shipment): V7 migration, Shipment/ShipmentStatusHistory entities, 5 services with state machine, 12 integration tests + public API surface test.
+- Phases 1–11 are COMPLETE and merged to `main`.
+- Phase 11 (Communication): V8 migration, 7 tables, 7 entities, 8 services, 17 integration tests + public API surface test.
 
 ## GitHub state
 
 | Field | Value |
 | --- | --- |
-| `freight-backend` main SHA | `bb9c2d4` |
+| `freight-backend` main SHA | `9bd4e3b` |
 | `freight-docs` main SHA | Update after pushing docs |
 | Open PRs | None |
 
@@ -34,8 +34,9 @@
 | V5 | freight | 5 tables |
 | V6 | marketplace | 1 table |
 | V7 | shipment | 2 tables |
+| V8 | communication | 7 tables |
 
-Total JPA entities: 32
+Total JPA entities: 39
 
 ## Module dependency graph (implemented)
 
@@ -45,25 +46,13 @@ fleet → (standalone)
 freight → (standalone)
 marketplace → accounts + fleet + freight
 shipment → accounts + fleet + freight + marketplace
-communication → accounts + fleet + freight + identity + marketplace + shipment (NEXT)
+communication → accounts + fleet + freight + identity + marketplace + shipment
 ```
 
 ## Tooling notes
 
 `gh` CLI is not authenticated. Use `git push` directly (credentials cached). PRs merged via local `git merge --squash` + push to main.
 
-## Exact next action
-
-1. **Read** `docs/architecture/module-boundaries.md` for communication module spec.
-2. **Read** `docs/architecture/database-erd.md` for communication tables.
-3. **Create branch** `feat/communication-module`.
-4. **Implement V8 Flyway migration** for communication schema tables.
-5. **Implement JPA entities** for Conversation, ConversationParticipant, Message, Notification, CommunicationPreference, PushEndpoint, NotificationDelivery.
-6. **Implement communication services**: GetOrCreateShipmentConversation, SendMessage, ListMessages, MarkConversationRead, ListNotifications, MarkNotificationRead, UpdateCommunicationPreferences, RegisterPushEndpoint.
-7. **Write integration tests + public API surface test**.
-8. **Update foundation tests** (entity count, table assertions, Flyway version "8").
-9. **Merge to main**, push, update docs.
-
 ## Blockers
 
-None. All prerequisites for Phase 11 (Communication) are merged.
+None. All backend business modules are complete through Phase 11.
