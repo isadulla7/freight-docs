@@ -9,9 +9,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Current architecture version | `v1.0` |
 | Authoritative `main` | Resolve the current SHA from GitHub; repository state is authoritative |
 | Latest completed architecture gate | Architecture v1.0 Lock |
-| Current task | `[12] Mobile/Web` (EXCLUDED per user instruction) |
-| Last completed backend checkpoint | `[11] Communication module — MERGED` |
-| Next task | Backend phases 5–11 COMPLETE. Phase 12 excluded. |
+| Current task | Phase 12 closure complete; international freight readiness enhancements in progress |
+| Last completed backend checkpoint | `[12.10] SpringDoc OpenAPI with contract tests — MERGED` |
+| Next task | Define the next main roadmap phase; finish the remaining international freight readiness phases separately |
 
 ## Roadmap
 
@@ -30,7 +30,28 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 9 | Marketplace | **COMPLETE** |
 | 10 | Shipment | **COMPLETE** |
 | 11 | Communication | **COMPLETE** |
-| 12 | Mobile/Web | **PENDING** |
+| 12 | API delivery layer (Security, REST, WebSocket, OpenAPI) | **COMPLETE** |
+
+## Phase 12 checkpoints
+
+| Checkpoint | Scope | Status |
+| --- | --- | --- |
+| 12.1 | JWT authentication filter (EdDSA) | **COMPLETE** |
+| 12.2 | Auth API controllers (OTP, refresh, logout, sessions) | **COMPLETE** |
+| 12.3 | User and company API controllers | **COMPLETE** |
+| 12.4 | Vehicle and reference API controllers | **COMPLETE** |
+| 12.5 | Load API controller | **COMPLETE** |
+| 12.6 | Offer API controller | **COMPLETE** |
+| 12.7 | Shipment API controller | **COMPLETE** |
+| 12.8 | Conversation and notification API controllers | **COMPLETE** |
+| 12.9 | STOMP WebSocket with JWT handshake | **COMPLETE** |
+| 12.10 | SpringDoc OpenAPI with contract tests | **COMPLETE** |
+
+## Post-Phase 12 maintenance
+
+- International freight readiness work added structured load-stop locations, nullable validated currencies, freight documents, and initial locale persistence/API support.
+- Main Kotlin packages were reorganized into explicit `api`, `application`, `domain/model`, `infrastructure/persistence`, `bootstrap`, and `shared` layers.
+- Spring Modulith boundaries and public API surface tests were updated for the layered package structure.
 
 ## Backend Foundation checkpoints
 

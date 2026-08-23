@@ -4,22 +4,24 @@
 | --- | --- |
 | Repositories | `isadulla7/freight-docs`, `isadulla7/freight-backend` |
 | freight-docs branch | `main` |
-| freight-backend branch | `main` (clean) |
+| freight-backend branch | `main` (synchronized with `origin/main`) |
 | Base branch | `main` (both repos) |
-| Current phase | All backend phases (5–11) COMPLETE |
-| Last completed phase | `[11] Communication` |
-| Next phase | `[12] Mobile/Web` — EXCLUDED per user instruction |
+| Current phase | Backend phases 1–12 COMPLETE |
+| Last completed phase | `[12] API delivery layer` (checkpoints 12.1–12.10) |
+| Next phase | Not yet defined |
 
 ## Work state
 
-- Phases 1–11 are COMPLETE and merged to `main`.
+- Phases 1–12 are COMPLETE and merged to `main`.
 - Phase 11 (Communication): V8 migration, 7 tables, 7 entities, 8 services, 17 integration tests + public API surface test.
+- Phase 12: JWT security, REST controllers for all business modules, STOMP WebSocket, and SpringDoc OpenAPI contract tests.
+- Post-Phase 12: international freight enhancements and a layered package architecture refactor were merged.
 
 ## GitHub state
 
 | Field | Value |
 | --- | --- |
-| `freight-backend` main SHA | `9bd4e3b` |
+| `freight-backend` main SHA | `7b87f5d` |
 | `freight-docs` main SHA | Update after pushing docs |
 | Open PRs | None |
 
@@ -35,18 +37,24 @@
 | V6 | marketplace | 1 table |
 | V7 | shipment | 2 tables |
 | V8 | communication | 7 tables |
+| V9 | freight | structured load-stop location fields |
+| V11 | freight | load documents table |
+| V12 | accounts | preferred locale field |
+| V13 | marketplace | nullable currency compatibility |
 
-Total JPA entities: 39
+V10 is intentionally unused; existing migrations were not renumbered or modified.
 
-## Module dependency graph (implemented)
+Total JPA entities: 40
+
+## Package architecture (implemented)
 
 ```
-identity → accounts
-fleet → (standalone)
-freight → (standalone)
-marketplace → accounts + fleet + freight
-shipment → accounts + fleet + freight + marketplace
-communication → accounts + fleet + freight + identity + marketplace + shipment
+uz.freight.api.<module>                  REST/WebSocket delivery and DTOs
+uz.freight.<module>.application         commands, queries, and public use cases
+uz.freight.<module>.domain.model        domain entities, enums, and value types
+uz.freight.<module>.infrastructure      persistence adapters and repositories
+uz.freight.bootstrap                    security and application configuration
+uz.freight.shared                       shared error, validation, and web utilities
 ```
 
 ## Tooling notes
@@ -55,4 +63,4 @@ communication → accounts + fleet + freight + identity + marketplace + shipment
 
 ## Blockers
 
-None. All backend business modules are complete through Phase 11.
+None. Backend phases are complete through Phase 12. The next main roadmap phase has not yet been defined.

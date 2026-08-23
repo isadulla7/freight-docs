@@ -1,10 +1,11 @@
 # Next task
 
-Phases 5–11 (Identity, Accounts, Fleet, Freight, Marketplace, Shipment, Communication) are COMPLETE and merged.
+Phases 1–12 are COMPLETE and merged. Phase 12 delivered the backend-facing API layer through checkpoints 12.1–12.10.
 
-- **Current phase:** All backend phases COMPLETE
-- **Last completed phase:** Communication (phase 11) — `9bd4e3b`
-- **Next task:** Phase 12 (Mobile/Web) is EXCLUDED per user instruction
+- **Current phase:** Phase 12 COMPLETE
+- **Last completed checkpoint:** SpringDoc OpenAPI with contract tests (12.10) — `48942b3`
+- **Latest backend state:** Layered package architecture refactor — `851ef09`
+- **Next task:** Define and approve the next main roadmap phase
 - **Architecture spec:** [docs/architecture/module-boundaries.md](docs/architecture/module-boundaries.md)
 - **Database spec:** [docs/architecture/database-erd.md](docs/architecture/database-erd.md)
 - **Implementation repository:** [isadulla7/freight-backend](https://github.com/isadulla7/freight-backend)
@@ -25,16 +26,21 @@ Phases 5–11 (Identity, Accounts, Fleet, Freight, Marketplace, Shipment, Commun
 
 **Communication (phase 11):** V8 migration (7 tables — conversations, conversation_participants, messages, notifications, communication_preferences, push_endpoints, notification_deliveries), GetOrCreateShipmentConversation (idempotent), SendMessage (participant validation, auto-sequence), ListMessages (cursor-based), MarkConversationRead, ListNotifications, MarkNotificationRead, UpdateCommunicationPreferences (upsert), RegisterPushEndpoint (idempotent).
 
+**API delivery layer (phase 12):** JWT authentication filter; Auth, User, Company, Vehicle, Reference, Load, Offer, Shipment, Conversation, and Notification REST controllers; STOMP WebSocket with JWT handshake; SpringDoc OpenAPI and contract tests.
+
+**Post-Phase 12 maintenance:** International freight readiness enhancements were started. Main code was reorganized into `api`, module `application`, `domain/model`, `infrastructure/persistence`, `bootstrap`, and `shared` packages while preserving Spring Modulith boundaries.
+
 ## Summary
 
-All backend business modules are implemented:
-- 8 Flyway migrations (V1–V8)
-- 39 JPA entities across 7 module schemas
+All backend business modules and the Phase 12 delivery layer are implemented:
+- Flyway migrations through V13 (V10 intentionally unused)
+- 40 JPA entities across 7 module schemas
 - Full CQRS public API surface per module-boundaries.md
+- REST APIs, authenticated STOMP WebSocket, and OpenAPI contract coverage
 - Comprehensive integration tests with Testcontainers (PostGIS + Redis)
 - Public API surface tests enforcing module encapsulation
 - Spring Modulith module boundaries enforced
 
 ## Blockers
 
-None. Backend implementation is complete through Phase 11.
+None. Backend implementation is complete through Phase 12. The next main roadmap phase needs to be defined before implementation continues.
