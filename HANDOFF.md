@@ -6,20 +6,20 @@
 | freight-docs branch | `main` |
 | freight-backend branch | `main` (clean) |
 | Base branch | `main` (both repos) |
-| Current phase | `[10] Shipment` |
-| Last completed phase | `[9] Marketplace` |
-| Next phase | `[10] Shipment — Shipment lifecycle` |
+| Current phase | `[11] Communication` |
+| Last completed phase | `[10] Shipment` |
+| Next phase | `[11] Communication — Conversations, messages, notifications` |
 
 ## Work state
 
-- Phases 1–9 are COMPLETE and merged to `main`.
-- Phase 9 (Marketplace): V6 migration, Offer entity with optimistic locking, 6 services (CreateOffer, WithdrawOffer, RejectOffer, AcceptOffer, GetOfferSummary, ListOffersForLoad), concurrency-safe winner selection via freight.MatchLoad, auto-reject of remaining pending offers. 15 integration tests + public API surface test.
+- Phases 1–10 are COMPLETE and merged to `main`.
+- Phase 10 (Shipment): V7 migration, Shipment/ShipmentStatusHistory entities, 5 services with state machine, 12 integration tests + public API surface test.
 
 ## GitHub state
 
 | Field | Value |
 | --- | --- |
-| `freight-backend` main SHA | `a146a97` |
+| `freight-backend` main SHA | `bb9c2d4` |
 | `freight-docs` main SHA | Update after pushing docs |
 | Open PRs | None |
 
@@ -33,17 +33,19 @@
 | V4 | fleet | 8 tables |
 | V5 | freight | 5 tables |
 | V6 | marketplace | 1 table |
+| V7 | shipment | 2 tables |
 
-Total JPA entities: 30
+Total JPA entities: 32
 
 ## Module dependency graph (implemented)
 
 ```
 identity → accounts
-fleet → (standalone, no cross-module deps)
-freight → (standalone, no cross-module deps)
+fleet → (standalone)
+freight → (standalone)
 marketplace → accounts + fleet + freight
-shipment → accounts + fleet + freight + marketplace (NEXT)
+shipment → accounts + fleet + freight + marketplace
+communication → accounts + fleet + freight + identity + marketplace + shipment (NEXT)
 ```
 
 ## Tooling notes
@@ -52,17 +54,16 @@ shipment → accounts + fleet + freight + marketplace (NEXT)
 
 ## Exact next action
 
-1. **Read** `docs/architecture/module-boundaries.md` for shipment module spec.
-2. **Read** `docs/architecture/database-erd.md` for shipment tables.
-3. **Create branch** `feat/shipment-module`.
-4. **Implement V7 Flyway migration** for shipment schema tables (shipments, shipment_stops, shipment_status_history).
-5. **Implement JPA entities** for Shipment (with @Version), ShipmentStop, ShipmentStatusHistory.
-6. **Implement shipment services**: GetShipment, ListUserShipments, UpdateShipmentStatus, GetShipmentStatusHistory.
-7. **Implement OfferAccepted event consumer** to create shipment from accepted offer (reliable, idempotent).
-8. **Write integration tests + public API surface test**.
-9. **Update foundation tests** (entity count, table assertions, Flyway version "7").
-10. **Merge to main**, push, update docs.
+1. **Read** `docs/architecture/module-boundaries.md` for communication module spec.
+2. **Read** `docs/architecture/database-erd.md` for communication tables.
+3. **Create branch** `feat/communication-module`.
+4. **Implement V8 Flyway migration** for communication schema tables.
+5. **Implement JPA entities** for Conversation, ConversationParticipant, Message, Notification, CommunicationPreference, PushEndpoint, NotificationDelivery.
+6. **Implement communication services**: GetOrCreateShipmentConversation, SendMessage, ListMessages, MarkConversationRead, ListNotifications, MarkNotificationRead, UpdateCommunicationPreferences, RegisterPushEndpoint.
+7. **Write integration tests + public API surface test**.
+8. **Update foundation tests** (entity count, table assertions, Flyway version "8").
+9. **Merge to main**, push, update docs.
 
 ## Blockers
 
-None. All prerequisites for Phase 10 (Shipment) are merged.
+None. All prerequisites for Phase 11 (Communication) are merged.

@@ -1,10 +1,10 @@
 # Next task
 
-Phases 5–9 (Identity, Accounts, Fleet, Freight, Marketplace) are COMPLETE and merged.
+Phases 5–10 (Identity, Accounts, Fleet, Freight, Marketplace, Shipment) are COMPLETE and merged.
 
-- **Current phase:** Shipment (phase 10)
-- **Last completed phase:** Marketplace (phase 9) — `a146a97`
-- **Next task:** Shipment module — Shipment lifecycle from accepted offer
+- **Current phase:** Communication (phase 11)
+- **Last completed phase:** Shipment (phase 10) — `bb9c2d4`
+- **Next task:** Communication module — Conversations, messages, notifications
 - **Architecture spec:** [docs/architecture/module-boundaries.md](docs/architecture/module-boundaries.md)
 - **Database spec:** [docs/architecture/database-erd.md](docs/architecture/database-erd.md)
 - **Implementation repository:** [isadulla7/freight-backend](https://github.com/isadulla7/freight-backend)
@@ -14,8 +14,8 @@ Before any implementation:
 1. Read `AGENTS.md`
 2. Read `PROJECT-STATUS.md`
 3. Read `HANDOFF.md`
-4. Read `docs/architecture/module-boundaries.md` (shipment section)
-5. Read `docs/architecture/database-erd.md` (shipment tables)
+4. Read `docs/architecture/module-boundaries.md` (communication section)
+5. Read `docs/architecture/database-erd.md` (communication tables)
 6. Inspect the current `freight-backend` GitHub `main`
 7. Confirm no open PRs conflict
 
@@ -25,46 +25,52 @@ Do not rely on previous chat history.
 
 **Identity (phase 5):** All public API members merged including `VerifyOtpAndRegister`.
 
-**Accounts (phase 6):** All 12 services implemented and merged. Full authorization model (roles, permissions, company member roles).
+**Accounts (phase 6):** All 12 services implemented and merged.
 
-**Fleet (phase 7):** V4 migration (8 tables), PostGIS geospatial search, vehicle lifecycle. Services: CreateVehicle, UpdateVehicle, DeactivateVehicle, GetVehicleSummary, VerifyVehicle, PublishAvailableVehicle, CloseAvailableVehicle, SearchNearbyVehicles, ValidateVehicleEligibility.
+**Fleet (phase 7):** V4 migration (8 tables), vehicle lifecycle, geospatial search.
 
-**Freight (phase 8):** V5 migration (5 tables), load lifecycle with optimistic locking. Services: CreateLoad, UpdateDraftLoad, PublishLoad, CancelLoad, ExpireLoad, MatchLoad (concurrency-safe), GetLoadSummary, SearchLoads, ValidateOfferEligibility.
+**Freight (phase 8):** V5 migration (5 tables), load lifecycle with optimistic locking, MatchLoad concurrency-safe.
 
-**Marketplace (phase 9):** V6 migration (1 table — offers with partial unique, XOR offerer, optimistic locking). Services: CreateOffer, WithdrawOffer, RejectOffer, AcceptOffer (concurrency-safe via freight.MatchLoad, auto-rejects remaining pending), GetOfferSummary, ListOffersForLoad. Cross-module: freight.ValidateOfferEligibility, fleet.ValidateVehicleEligibility.
+**Marketplace (phase 9):** V6 migration (1 table — offers), CreateOffer, WithdrawOffer, RejectOffer, AcceptOffer (concurrency-safe, auto-rejects remaining pending), GetOfferSummary, ListOffersForLoad.
 
-## Phase 10: Shipment
+**Shipment (phase 10):** V7 migration (2 tables — shipments, shipment_status_history), CreateShipment (idempotent by offer_id), GetShipment, ListUserShipments, UpdateShipmentStatus (state machine: CREATED→IN_TRANSIT→DELIVERED→COMPLETED, cancellable), GetShipmentStatusHistory.
 
-Implement the shipment module — transport execution from accepted offers:
+## Phase 11: Communication
 
-### Database (V7 migration)
+Implement the communication module — conversations, messaging, notifications:
 
-Create `shipment` schema tables per `database-erd.md`:
-- `shipments` — with @Version for optimistic locking, status enum, assignment snapshot
-- `shipment_stops` — immutable execution snapshot of load stops
-- `shipment_status_history` — append-only status change log
+### Database (V8 migration)
+
+Create `communication` schema tables per `database-erd.md`:
+- `conversations` — shipment-scoped, type/status
+- `conversation_participants` — composite PK, role, read tracking
+- `messages` — immutable, sender, body, sequence
+- `notifications` — recipient, type, source, read state
+- `communication_preferences` — user channel/type preferences
+- `push_endpoints` — device push tokens
+- `notification_deliveries` — delivery attempts, idempotency
 
 ### Module dependencies
 
-`shipment` depends on: `accounts`, `fleet`, `freight`, `marketplace` (per `module-boundaries.md`).
+`communication` depends on: `accounts`, `fleet`, `freight`, `identity`, `marketplace`, `shipment` (per `module-boundaries.md`).
 
 ### Public API services
 
-1. **GetShipment** — read model
-2. **ListUserShipments** — query by user
-3. **UpdateShipmentStatus** — state machine transitions
-4. **GetShipmentStatusHistory** — append-only history read
-
-### Event consumption
-
-- `OfferAccepted` — create shipment reliably and idempotently from the accepted offer
+1. **GetOrCreateShipmentConversation** — find or create conversation for a shipment
+2. **SendMessage** — add message to conversation
+3. **ListMessages** — paginated message list
+4. **MarkConversationRead** — update read position
+5. **ListNotifications** — user notifications
+6. **MarkNotificationRead** — mark notification as read
+7. **UpdateCommunicationPreferences** — user preference management
+8. **RegisterPushEndpoint** — device push token registration
 
 ### Testing
 
 - Integration tests (Testcontainers) for all services
 - Public API surface test
-- Update PersistenceFoundationTests (entity count) and PostgreSqlIntegrationTests (Flyway version "7", shipment table assertions)
+- Update PersistenceFoundationTests and PostgreSqlIntegrationTests
 
 ## Blockers
 
-None. All prerequisites for Phase 10 (Shipment) are merged.
+None.

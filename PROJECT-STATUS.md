@@ -9,9 +9,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Current architecture version | `v1.0` |
 | Authoritative `main` | Resolve the current SHA from GitHub; repository state is authoritative |
 | Latest completed architecture gate | Architecture v1.0 Lock |
-| Current task | `[10] Shipment` |
-| Last completed backend checkpoint | `[9] Marketplace module — MERGED` |
-| Next task | `[10] Shipment — Shipment lifecycle from accepted offer` |
+| Current task | `[11] Communication` |
+| Last completed backend checkpoint | `[10] Shipment module — MERGED` |
+| Next task | `[11] Communication — Conversations, messages, notifications` |
 
 ## Roadmap
 
@@ -28,8 +28,8 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | 7 | Fleet | **COMPLETE** |
 | 8 | Freight | **COMPLETE** |
 | 9 | Marketplace | **COMPLETE** |
-| 10 | Shipment | **NEXT** |
-| 11 | Communication | **PENDING** |
+| 10 | Shipment | **COMPLETE** |
+| 11 | Communication | **NEXT** |
 | 12 | Mobile/Web | **PENDING** |
 
 ## Backend Foundation checkpoints
@@ -87,3 +87,9 @@ This file is a navigation summary. Accepted architecture remains in the [canonic
 | Checkpoint | Scope | Status |
 | --- | --- | --- |
 | 9.1 | Marketplace persistence + full CQRS API (V6 migration, Offer entity, CreateOffer, WithdrawOffer, RejectOffer, AcceptOffer, GetOfferSummary, ListOffersForLoad, concurrency-safe winner selection) | **COMPLETE** |
+
+## Shipment checkpoints
+
+| Checkpoint | Scope | Status |
+| --- | --- | --- |
+| 10.1 | Shipment persistence + full CQRS API (V7 migration, Shipment/ShipmentStatusHistory entities, CreateShipment, GetShipment, ListUserShipments, UpdateShipmentStatus with state machine, GetShipmentStatusHistory) | **COMPLETE** |
