@@ -21,7 +21,7 @@
 
 | Field | Value |
 | --- | --- |
-| `freight-backend` main SHA | `7b87f5d` |
+| `freight-backend` main SHA | `db77721` |
 | `freight-docs` main SHA | Update after pushing docs |
 | Open PRs | None |
 
