@@ -7,9 +7,9 @@
 | freight-backend branch | `claude/mobile-continuation-bc5tsr` |
 | freight-mobile branch | `claude/mobile-continuation-bc5tsr` |
 | Base branch | `main` (backend, docs), `master` (mobile) |
-| Current phase | Mobile–backend API alignment |
-| Last completed work | OTP hardcode, list endpoints, model alignment |
-| Next step | Merge feature branches to main/master |
+| Current phase | Local dev environment + E2E verification |
+| Last completed work | Docker setup, seed data, full E2E flow verified |
+| Next step | Continue mobile app features |
 
 ## Work state
 
@@ -18,16 +18,19 @@
 - Phase 12: JWT security, REST controllers for all business modules, STOMP WebSocket, and SpringDoc OpenAPI contract tests.
 - Post-Phase 12: international freight enhancements and a layered package architecture refactor were merged.
 
-### Mobile–backend alignment (current)
+### Mobile–backend alignment (merged to main)
 
-Backend changes (`claude/mobile-continuation-bc5tsr`):
+Backend changes:
 - OTP hardcoded to `123456` for development (`RequestOtp.kt`)
-- `GET /companies/me` — new `ListUserCompanies` use case + controller endpoint
-- `GET /vehicles` — new `ListUserVehicles` use case + controller endpoint
+- `GET /companies/me` — `ListUserCompanies` use case + controller endpoint
+- `GET /vehicles` — `ListUserVehicles` use case + controller endpoint
 - `profileId` added to `DriverEligibilityResponse`
 - New DTOs: `CompanyResponse`, `CompanyListResponse`, `VehicleListResponse`
+- `CompanySummary.status` changed from `CompanyStatus` to `String` (fixes `internal` visibility leak)
+- Dockerfile + docker-compose backend service added
+- V15 seed reference data migration (roles, vehicle/body types, capabilities)
 
-Mobile changes (`claude/mobile-continuation-bc5tsr`):
+Mobile changes:
 - `CompanyResponse` aligned: `legalName`, `displayName`, `businessIdentifier`
 - `CreateCompanyPayload` simplified (removed address/phone)
 - `CompanyRepository.getMyCompanies()` added
@@ -35,15 +38,21 @@ Mobile changes (`claude/mobile-continuation-bc5tsr`):
 - `DriverEligibilityResponse` now includes `profileId`
 - `CreateOfferSheet` rewritten to fetch real driver profile and vehicle data
 
+### E2E verification (completed)
+
+Full flow tested locally with all 56 API endpoints available:
+OTP → Auth → Profile → Role → Driver Profile → Vehicle → Company → Load → Publish → Offer
+All steps pass. Swagger UI at `/swagger-ui/index.html`.
+
 ## GitHub state
 
 | Field | Value |
 | --- | --- |
-| `freight-backend` main SHA | `db77721` |
-| `freight-backend` feature SHA | `466c69c` |
+| `freight-backend` main SHA | `433a67a` |
+| `freight-backend` feature SHA | `c9c1625` |
 | `freight-mobile` master SHA | See remote |
 | `freight-mobile` feature SHA | `5e120a5` |
-| Open PRs | None yet |
+| Open PRs | None |
 
 ## Flyway state
 
@@ -61,8 +70,9 @@ Mobile changes (`claude/mobile-continuation-bc5tsr`):
 | V11 | freight | load documents table |
 | V12 | accounts | preferred locale field |
 | V13 | marketplace | nullable currency compatibility |
+| V15 | seed data | roles, vehicle types, body types, capabilities |
 
-V10 is intentionally unused; existing migrations were not renumbered or modified.
+V10 and V14 are intentionally unused; existing migrations were not renumbered or modified.
 
 Total JPA entities: 40
 
@@ -76,6 +86,31 @@ uz.freight.<module>.infrastructure      persistence adapters and repositories
 uz.freight.bootstrap                    security and application configuration
 uz.freight.shared                       shared error, validation, and web utilities
 ```
+
+## Local development
+
+```bash
+# Infrastructure
+docker compose up postgres redis -d
+
+# Backend (local JDK 21+)
+DB_URL=jdbc:postgresql://localhost:5432/freight \
+DB_USERNAME=freight DB_PASSWORD=freight \
+REDIS_HOST=localhost REDIS_PORT=6379 REDIS_PASSWORD="" \
+REDIS_SSL_ENABLED=false JWT_PRIVATE_KEY="" \
+FREIGHT_SECURITY_DEPLOYMENT=LOCAL \
+./gradlew bootRun
+
+# Or full Docker stack
+docker compose up
+```
+
+Mobile connects to:
+- Android emulator: `http://10.0.2.2:8080/api/v1`
+- iOS simulator: `http://localhost:8080/api/v1`
+- Physical device: `http://<your-local-ip>:8080/api/v1`
+
+Dev OTP code: `123456` (any phone number)
 
 ## Tooling notes
 
