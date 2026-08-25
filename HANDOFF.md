@@ -2,13 +2,14 @@
 
 | Field | Value |
 | --- | --- |
-| Repositories | `isadulla7/freight-docs`, `isadulla7/freight-backend` |
-| freight-docs branch | `main` |
-| freight-backend branch | `main` (synchronized with `origin/main`) |
-| Base branch | `main` (both repos) |
-| Current phase | Backend phases 1–12 COMPLETE |
-| Last completed phase | `[12] API delivery layer` (checkpoints 12.1–12.10) |
-| Next phase | Not yet defined |
+| Repositories | `isadulla7/freight-docs`, `isadulla7/freight-backend`, `isadulla7/freight-mobile` |
+| freight-docs branch | `claude/mobile-continuation-bc5tsr` |
+| freight-backend branch | `claude/mobile-continuation-bc5tsr` |
+| freight-mobile branch | `claude/mobile-continuation-bc5tsr` |
+| Base branch | `main` (backend, docs), `master` (mobile) |
+| Current phase | Mobile–backend API alignment |
+| Last completed work | OTP hardcode, list endpoints, model alignment |
+| Next step | Merge feature branches to main/master |
 
 ## Work state
 
@@ -17,13 +18,32 @@
 - Phase 12: JWT security, REST controllers for all business modules, STOMP WebSocket, and SpringDoc OpenAPI contract tests.
 - Post-Phase 12: international freight enhancements and a layered package architecture refactor were merged.
 
+### Mobile–backend alignment (current)
+
+Backend changes (`claude/mobile-continuation-bc5tsr`):
+- OTP hardcoded to `123456` for development (`RequestOtp.kt`)
+- `GET /companies/me` — new `ListUserCompanies` use case + controller endpoint
+- `GET /vehicles` — new `ListUserVehicles` use case + controller endpoint
+- `profileId` added to `DriverEligibilityResponse`
+- New DTOs: `CompanyResponse`, `CompanyListResponse`, `VehicleListResponse`
+
+Mobile changes (`claude/mobile-continuation-bc5tsr`):
+- `CompanyResponse` aligned: `legalName`, `displayName`, `businessIdentifier`
+- `CreateCompanyPayload` simplified (removed address/phone)
+- `CompanyRepository.getMyCompanies()` added
+- `CompaniesScreen` fetches and displays real company data
+- `DriverEligibilityResponse` now includes `profileId`
+- `CreateOfferSheet` rewritten to fetch real driver profile and vehicle data
+
 ## GitHub state
 
 | Field | Value |
 | --- | --- |
 | `freight-backend` main SHA | `db77721` |
-| `freight-docs` main SHA | Update after pushing docs |
-| Open PRs | None |
+| `freight-backend` feature SHA | `466c69c` |
+| `freight-mobile` master SHA | See remote |
+| `freight-mobile` feature SHA | `5e120a5` |
+| Open PRs | None yet |
 
 ## Flyway state
 
@@ -63,4 +83,4 @@ uz.freight.shared                       shared error, validation, and web utilit
 
 ## Blockers
 
-None. Backend phases are complete through Phase 12. The next main roadmap phase has not yet been defined.
+None.
